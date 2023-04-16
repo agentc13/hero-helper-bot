@@ -231,7 +231,8 @@ class Owner(commands.Cog, name="owner"):
         """
         if context.invoked_subcommand is None:
             embed = discord.Embed(
-                description="You need to specify a subcommand.\n\n**Subcommands:**\n`add` - Add a user to the blacklist.\n`remove` - Remove a user from the blacklist.",
+                description="You need to specify a subcommand.\n\n**Subcommands:**\n`add` - Add a user to the blacklist."
+                            "\n`remove` - Remove a user from the blacklist.",
                 color=0xE02B2B,
             )
             await context.send(embed=embed)

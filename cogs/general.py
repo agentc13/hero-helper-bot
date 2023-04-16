@@ -108,26 +108,26 @@ class General(commands.Cog, name="general"):
         await context.send(embed=embed)
 
     # bot invite command
-    @commands.hybrid_command(
-        name="invite",
-        description="Get the invite link of the bot to be able to invite it.",
-    )
-    @checks.not_blacklisted()
-    async def invite(self, context: Context) -> None:
-        """
-        Get the invite link of the bot to be able to invite it.
-
-        :param context: The hybrid command context.
-        """
-        embed = discord.Embed(
-            description=f"Invite me by clicking [here](https://discordapp.com/oauth2/authorize?&client_id={self.bot.config['application_id']}&scope=bot+applications.commands&permissions={self.bot.config['permissions']}).",
-            color=0xD75BF4,
-        )
-        try:
-            await context.author.send(embed=embed)
-            await context.send("I sent you a private message!")
-        except discord.Forbidden:
-            await context.send(embed=embed)
+    # @commands.hybrid_command(
+    #     name="invite",
+    #     description="Get the invite link of the bot to be able to invite it.",
+    # )
+    # @checks.not_blacklisted()
+    # async def invite(self, context: Context) -> None:
+    #     """
+    #     Get the invite link of the bot to be able to invite it.
+    #
+    #     :param context: The hybrid command context.
+    #     """
+    #     embed = discord.Embed(
+    #         description=f"Invite me by clicking [here](https://discordapp.com/oauth2/authorize?&client_id={self.bot.config['application_id']}&scope=bot+applications.commands&permissions={self.bot.config['permissions']}).",
+    #         color=0xD75BF4,
+    #     )
+    #     try:
+    #         await context.author.send(embed=embed)
+    #         await context.send("I sent you a private message!")
+    #     except discord.Forbidden:
+    #         await context.send(embed=embed)
 
     # server invite command
     @commands.hybrid_command(

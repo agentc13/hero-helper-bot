@@ -19,6 +19,7 @@ class Moderation(commands.Cog, name="moderation"):
     def __init__(self, bot):
         self.bot = bot
 
+    # Set user's server nickname
     @commands.hybrid_command(
         name="nick",
         description="Change the nickname of a user on a server.",
@@ -57,6 +58,7 @@ class Moderation(commands.Cog, name="moderation"):
             )
             await context.send(embed=embed)
 
+    # warning command
     @commands.hybrid_group(
         name="warning",
         description="Manage warnings of a user on a server.",
@@ -76,6 +78,7 @@ class Moderation(commands.Cog, name="moderation"):
             )
             await context.send(embed=embed)
 
+    # add warning
     @warning.command(
         name="add",
         description="Adds a warning to a user in the server.",
@@ -117,7 +120,7 @@ class Moderation(commands.Cog, name="moderation"):
             await context.send(
                 f"{member.mention}, you were warned by **{context.author}**!\nReason: {reason}"
             )
-
+    # remove warning
     @warning.command(
         name="remove",
         description="Removes a warning from a user in the server.",
@@ -148,6 +151,7 @@ class Moderation(commands.Cog, name="moderation"):
         )
         await context.send(embed=embed)
 
+    # list warnings
     @warning.command(
         name="list",
         description="Shows the warnings of a user in the server.",
@@ -173,6 +177,7 @@ class Moderation(commands.Cog, name="moderation"):
         embed.description = description
         await context.send(embed=embed)
 
+    # purge command
     @commands.hybrid_command(
         name="purge",
         description="Delete a number of messages.",
