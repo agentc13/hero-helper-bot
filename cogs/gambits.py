@@ -79,7 +79,7 @@ class Gambits(commands.Cog, name="gambits"):
         """Sends the Gambit Effect List."""
         embed = discord.Embed(
             description=f"{gambits}",
-            color=0x9C84EF,
+            color=0x1f8b4c,
         )
         embed.set_author(name="Gambit Effect List")
         await context.send(embed=embed)

@@ -19,45 +19,6 @@ class Moderation(commands.Cog, name="moderation"):
     def __init__(self, bot):
         self.bot = bot
 
-    # Set user's server nickname
-    @commands.hybrid_command(
-        name="nick",
-        description="Change the nickname of a user on a server.",
-    )
-    @commands.has_permissions(manage_nicknames=True)
-    @commands.bot_has_permissions(manage_nicknames=True)
-    @checks.not_blacklisted()
-    @app_commands.describe(
-        user="The user that should have a new nickname.",
-        nickname="The new nickname that should be set.",
-    )
-    async def nick(
-        self, context: Context, user: discord.User, *, nickname: str = None
-    ) -> None:
-        """
-        Change the nickname of a user on a server.
-
-        :param context: The hybrid command context.
-        :param user: The user that should have its nickname changed.
-        :param nickname: The new nickname of the user. Default is None, which will reset the nickname.
-        """
-        member = context.guild.get_member(user.id) or await context.guild.fetch_member(
-            user.id
-        )
-        try:
-            await member.edit(nick=nickname)
-            embed = discord.Embed(
-                description=f"**{member}'s** new nickname is **{nickname}**!",
-                color=0x9C84EF,
-            )
-            await context.send(embed=embed)
-        except:
-            embed = discord.Embed(
-                description="An error occurred while trying to change the nickname of the user. Make sure my role is above the role of the user you want to change the nickname.",
-                color=0xE02B2B,
-            )
-            await context.send(embed=embed)
-
     # warning command
     @commands.hybrid_group(
         name="warning",
@@ -73,7 +34,11 @@ class Moderation(commands.Cog, name="moderation"):
         """
         if context.invoked_subcommand is None:
             embed = discord.Embed(
-                description="Please specify a subcommand.\n\n**Subcommands:**\n`add` - Add a warning to a user.\n`remove` - Remove a warning from a user.\n`list` - List all warnings of a user.",
+                description="Please specify a subcommand.\n\n"
+                            "**Subcommands:**\n"
+                            "`add` - Add a warning to a user.\n"
+                            "`remove` - Remove a warning from a user.\n"
+                            "`list` - List all warnings of a user.",
                 color=0xE02B2B,
             )
             await context.send(embed=embed)
@@ -120,6 +85,7 @@ class Moderation(commands.Cog, name="moderation"):
             await context.send(
                 f"{member.mention}, you were warned by **{context.author}**!\nReason: {reason}"
             )
+
     # remove warning
     @warning.command(
         name="remove",
@@ -195,13 +161,9 @@ class Moderation(commands.Cog, name="moderation"):
         """
         await context.send(
             "Deleting messages..."
-        )  # Bit of a hacky way to make sure the bot responds to the interaction and doesn't get a "Unknown Interaction" response
-        purged_messages = await context.channel.purge(limit=amount + 1)
-        # embed = discord.Embed(
-        #     description=f"**{context.author}** cleared **{len(purged_messages)-1}** messages!",
-        #     color=0x9C84EF,
-        # )
-        # await context.channel.send(embed=embed)
+        )
+        await context.channel.purge(limit=amount + 1)
+
 
 async def setup(bot):
     await bot.add_cog(Moderation(bot))

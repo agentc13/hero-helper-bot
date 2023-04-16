@@ -161,7 +161,8 @@ async def on_command_completion(context: Context) -> None:
     executed_command = str(split[0])
     if context.guild is not None:
         bot.logger.info(
-            f"Executed {executed_command} command in {context.guild.name} (ID: {context.guild.id}) by {context.author} (ID: {context.author.id})"
+            f"Executed {executed_command} command in {context.guild.name} (ID: {context.guild.id}) by {context.author} "
+            f"(ID: {context.author.id})"
         )
     else:
         bot.logger.info(
@@ -197,11 +198,13 @@ async def on_command_error(context: Context, error) -> None:
         await context.send(embed=embed)
         if context.guild:
             bot.logger.warning(
-                f"{context.author} (ID: {context.author.id}) tried to execute a command in the guild {context.guild.name} (ID: {context.guild.id}), but the user is blacklisted from using the bot."
+                f"{context.author} (ID: {context.author.id}) tried to execute a command in the guild "
+                f"{context.guild.name} (ID: {context.guild.id}), but the user is blacklisted from using the bot."
             )
         else:
             bot.logger.warning(
-                f"{context.author} (ID: {context.author.id}) tried to execute a command in the bot's DMs, but the user is blacklisted from using the bot."
+                f"{context.author} (ID: {context.author.id}) tried to execute a command in the bot's DMs, but the user "
+                f"is blacklisted from using the bot."
             )
     elif isinstance(error, exceptions.UserNotOwner):
         """
@@ -213,11 +216,13 @@ async def on_command_error(context: Context, error) -> None:
         await context.send(embed=embed)
         if context.guild:
             bot.logger.warning(
-                f"{context.author} (ID: {context.author.id}) tried to execute an owner only command in the guild {context.guild.name} (ID: {context.guild.id}), but the user is not an owner of the bot."
+                f"{context.author} (ID: {context.author.id}) tried to execute an owner only command in the guild "
+                f"{context.guild.name} (ID: {context.guild.id}), but the user is not an owner of the bot."
             )
         else:
             bot.logger.warning(
-                f"{context.author} (ID: {context.author.id}) tried to execute an owner only command in the bot's DMs, but the user is not an owner of the bot."
+                f"{context.author} (ID: {context.author.id}) tried to execute an owner only command in the bot's DMs, "
+                f"but the user is not an owner of the bot."
             )
     elif isinstance(error, commands.MissingPermissions):
         embed = discord.Embed(

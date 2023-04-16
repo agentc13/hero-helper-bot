@@ -21,13 +21,13 @@ class Owner(commands.Cog, name="owner"):
 
     @commands.command(
         name="sync",
-        description="Synchonizes the slash commands.",
+        description="Synchronize the slash commands.",
     )
     @app_commands.describe(scope="The scope of the sync. Can be `global` or `guild`")
     @checks.is_owner()
     async def sync(self, context: Context, scope: str) -> None:
         """
-        Synchonizes the slash commands.
+        Synchronize the slash commands.
 
         :param context: The command context.
         :param scope: The scope of the sync. Can be `global` or `guild`.
@@ -57,7 +57,7 @@ class Owner(commands.Cog, name="owner"):
 
     @commands.command(
         name="unsync",
-        description="Unsynchonizes the slash commands.",
+        description="Unsynchronize the slash commands.",
     )
     @app_commands.describe(
         scope="The scope of the sync. Can be `global`, `current_guild` or `guild`"
@@ -65,7 +65,7 @@ class Owner(commands.Cog, name="owner"):
     @checks.is_owner()
     async def unsync(self, context: Context, scope: str) -> None:
         """
-        Unsynchonizes the slash commands.
+        Unsynchronize the slash commands.
 
         :param context: The command context.
         :param scope: The scope of the sync. Can be `global`, `current_guild` or `guild`.

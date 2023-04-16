@@ -152,7 +152,7 @@ class Tcl(commands.Cog, name="tcl"):
         total = await db_manager.remove_user_from_tcl(user_id)
         embed = discord.Embed(
             description=f"**{user.name}** has been successfully removed from Thandar Combat League.",
-            color = 0x992d22
+            color=0x992d22,
         )
         embed.set_footer(
             text=f"There {'is' if total == 1 else 'are'} now {total} {'user' if total == 1 else 'users'} in "
