@@ -1,0 +1,14 @@
+
+TCL Cog:
+Import waitlist into participants (start command?)
+Create start command for league season - TO
+Create end command for league season - TO
+Division announcement command - TO
+Weekly match announcement command (new and outstanding matches) - TO
+Promote/demote command (auto assigns division roles?) - TO
+
+
+
+Division standings command - participants
+Current match command - participants
+Outstanding matches announcement - participants

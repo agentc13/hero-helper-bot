@@ -23,7 +23,7 @@ async def get_tcl_users() -> list:
     """
     async with aiosqlite.connect(DATABASE_PATH) as db:
         async with db.execute(
-            "SELECT user_id, strftime('%s', created_at) FROM tcl"
+            "SELECT user_id, hr_ign, strftime('%s', created_at) FROM tcl"
         ) as cursor:
             result = await cursor.fetchall()
             return result
@@ -44,14 +44,15 @@ async def is_signed_up(user_id: int) -> bool:
             return result is not None
 
 
-async def add_user_to_tcl(user_id: int) -> int:
+async def add_user_to_tcl(user_id: int, hr_ign: str) -> int:
     """
     This function will add a user based on its ID in the TCL database.
 
     :param user_id: The ID of the user that should be added into the TCL database.
+    :param hr_ign: The Hero Realms In Game Name of the user to be added into the TCL database.
     """
     async with aiosqlite.connect(DATABASE_PATH) as db:
-        await db.execute("INSERT INTO tcl(user_id) VALUES (?)", (user_id,))
+        await db.execute("INSERT INTO tcl(user_id, hr_ign) VALUES (?, ?)", (user_id, hr_ign))
         await db.commit()
         rows = await db.execute("SELECT COUNT(*) FROM tcl")
         async with rows as cursor:

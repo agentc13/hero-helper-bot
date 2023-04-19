@@ -66,7 +66,7 @@ class Tcl(commands.Cog, name="tcl"):
             user = self.bot.get_user(int(tcluser[0])) or await self.bot.fetch_user(
                 int(tcluser[0])
             )
-            users.append(f"• {user.mention} ({user}) - Signed Up <t:{tcluser[1]}>")
+            users.append(f"• {user.mention}  IGN: {tcluser[1]} - Signed Up <t:{tcluser[2]}>")
         embed.description = "\n".join(users)
         await context.send(embed=embed)
 
@@ -77,12 +77,13 @@ class Tcl(commands.Cog, name="tcl"):
     )
     @app_commands.describe(user="The user that should be added to Thandar Combat League")
     @checks.is_owner()
-    async def tcl_add(self, context: Context, user: discord.User) -> None:
+    async def tcl_add(self, context: Context, user: discord.User, hr_ign: str) -> None:
         """
         Lets you add a user to Thandar Combat League.
 
         :param context: The hybrid command context.
         :param user: The user that should be added to the Thandar Combat League.
+        :param hr_ign: The Hero Realms In Game Name for the user to be added to Thandar Combat League.
         """
         user_id = user.id
         if await db_manager.is_signed_up(user_id):
@@ -92,7 +93,7 @@ class Tcl(commands.Cog, name="tcl"):
             )
             await context.send(embed=embed)
             return
-        total = await db_manager.add_user_to_tcl(user_id)
+        total = await db_manager.add_user_to_tcl(user_id, hr_ign)
         embed = discord.Embed(
             description=f"**{user.name}** has been successfully added to Thandar Combat League",
             color=0x992d22,
@@ -139,12 +140,13 @@ class Tcl(commands.Cog, name="tcl"):
         name="waitlist",
         description="Sign up for Thandar Combat League.",
     )
-    async def waitlist(self, context: Context) -> None:
+    async def waitlist(self, context: Context, hr_ign: str) -> None:
         """
         Sign up for Thandar Combat League. You will receive a DM with the rules
         link and be added to the list of players for the next season.
 
         :param context: The hybrid command context.
+        :param hr_ign: Your Hero Realms In Game Name.
         """
         embed = discord.Embed(
             description=f"You have been added to the Thandar Combat League waitlist. You can find the rules document "
@@ -161,7 +163,7 @@ class Tcl(commands.Cog, name="tcl"):
                 )
                 await context.send(embed=embed)
                 return
-            total = await db_manager.add_user_to_tcl(user_id)
+            total = await db_manager.add_user_to_tcl(user_id, hr_ign)
             embed = discord.Embed(
                 description=f"**{context.author}** has been successfully added to Thandar Combat League",
                 color=0x992d22,
