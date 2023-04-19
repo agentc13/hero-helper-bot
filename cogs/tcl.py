@@ -19,33 +19,6 @@ class Tcl(commands.Cog, name="tcl"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(
-        name="waitlist",
-        description="Sign up for Thandar Combat League.",
-    )
-    # This will only allow non-blacklisted members to execute the command
-    @checks.not_blacklisted()
-    async def waitlist(self, context: Context) -> None:
-        """
-        Sign up for Thandar Combat League. You will receive a DM with the rules
-        link and be added to the list of players for the next season.
-
-        :param context: The hybrid command context.
-        """
-        # embed text for PM. Will be sent in channel if PM forbidden.
-        # TO DO: add code to actually sign up player and add to DB.
-        embed = discord.Embed(
-            description=f"You have been added to the Thandar Combat League waitlist. You can find the rules document "
-                        f"[here](https://agentc13.com/tcl-rules.html)",
-            color=0x992d22,
-        )
-        try:
-            await context.author.send(embed=embed)
-            await context.send(f"{context.author.mention} has signed up for Thandar Combat League!")
-        except discord.Forbidden:
-            await context.send(embed=embed)
-
-# Testing for DB stuff
     @commands.hybrid_group(
         name="tcl",
         description="Lets you add or remove a user to the Thandar Combat League.",
@@ -59,7 +32,9 @@ class Tcl(commands.Cog, name="tcl"):
         """
         if context.invoked_subcommand is None:
             embed = discord.Embed(
-                description="You need to specify a subcommand.\n\n**Subcommands:**\n`add` - Add a user to TCL."
+                description="You need to specify a subcommand.\n\n"
+                            "**Subcommands:**\n"
+                            "`add` - Add a user to TCL."
                             "\n`remove` - Remove a user from TCL.",
                 color=0x992d22,
             )
@@ -160,7 +135,45 @@ class Tcl(commands.Cog, name="tcl"):
         )
         await context.send(embed=embed)
 
+    @commands.hybrid_command(
+        name="waitlist",
+        description="Sign up for Thandar Combat League.",
+    )
+    async def waitlist(self, context: Context) -> None:
+        """
+        Sign up for Thandar Combat League. You will receive a DM with the rules
+        link and be added to the list of players for the next season.
 
-# And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
+        :param context: The hybrid command context.
+        """
+        embed = discord.Embed(
+            description=f"You have been added to the Thandar Combat League waitlist. You can find the rules document "
+                        f"[here](https://agentc13.com/tcl-rules.html)",
+            color=0x992d22,
+        )
+        try:
+            await context.author.send(embed=embed)
+            user_id = context.author.id
+            if await db_manager.is_signed_up(user_id):
+                embed = discord.Embed(
+                    description=f"**{context.author}** is already in Thandar Combat League.",
+                    color=0x992d22,
+                )
+                await context.send(embed=embed)
+                return
+            total = await db_manager.add_user_to_tcl(user_id)
+            embed = discord.Embed(
+                description=f"**{context.author}** has been successfully added to Thandar Combat League",
+                color=0x992d22,
+            )
+            embed.set_footer(
+                text=f"There {'is' if total == 1 else 'are'} now {total} {'user' if total == 1 else 'users'} in "
+                     f"Thandar Combat League"
+            )
+            await context.send(embed=embed)
+        except discord.Forbidden:
+            await context.send(embed=embed)
+
+
 async def setup(bot):
     await bot.add_cog(Tcl(bot))

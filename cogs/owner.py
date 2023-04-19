@@ -187,37 +187,6 @@ class Owner(commands.Cog, name="owner"):
         await context.send(embed=embed)
         await self.bot.close()
 
-    @commands.hybrid_command(
-        name="say",
-        description="The bot will say anything you want.",
-    )
-    @app_commands.describe(message="The message that should be repeated by the bot")
-    @checks.is_owner()
-    async def say(self, context: Context, *, message: str) -> None:
-        """
-        The bot will say anything you want.
-
-        :param context: The hybrid command context.
-        :param message: The message that should be repeated by the bot.
-        """
-        await context.send(message)
-
-    @commands.hybrid_command(
-        name="embed",
-        description="The bot will say anything you want, but within embeds.",
-    )
-    @app_commands.describe(message="The message that should be repeated by the bot")
-    @checks.is_owner()
-    async def embed(self, context: Context, *, message: str) -> None:
-        """
-        The bot will say anything you want, but using embeds.
-
-        :param context: The hybrid command context.
-        :param message: The message that should be repeated by the bot.
-        """
-        embed = discord.Embed(description=message, color=0x9C84EF)
-        await context.send(embed=embed)
-
     @commands.hybrid_group(
         name="blacklist",
         description="Get the list of all blacklisted users.",
@@ -231,8 +200,10 @@ class Owner(commands.Cog, name="owner"):
         """
         if context.invoked_subcommand is None:
             embed = discord.Embed(
-                description="You need to specify a subcommand.\n\n**Subcommands:**\n`add` - Add a user to the blacklist."
-                            "\n`remove` - Remove a user from the blacklist.",
+                description="You need to specify a subcommand.\n\n"
+                            "**Subcommands:**\n"
+                            "`add` - Add a user to the blacklist.\n"
+                            "`remove` - Remove a user from the blacklist.",
                 color=0xE02B2B,
             )
             await context.send(embed=embed)
