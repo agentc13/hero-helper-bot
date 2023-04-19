@@ -25,7 +25,6 @@ class General(commands.Cog, name="general"):
     @commands.hybrid_command(
         name="help", description="List all commands the bot has loaded."
     )
-    @checks.not_blacklisted()
     async def help(self, context: Context) -> None:
         prefix = self.bot.config["prefix"]
         embed = discord.Embed(
@@ -49,7 +48,6 @@ class General(commands.Cog, name="general"):
         name="botinfo",
         description="Get some useful (or not) information about the bot.",
     )
-    @checks.not_blacklisted()
     async def botinfo(self, context: Context) -> None:
         """
         Get some useful (or not) information about the bot.
@@ -78,7 +76,6 @@ class General(commands.Cog, name="general"):
         name="serverinfo",
         description="Get some useful (or not) information about the server.",
     )
-    @checks.not_blacklisted()
     async def serverinfo(self, context: Context) -> None:
         """
         Get some useful (or not) information about the server.
@@ -110,7 +107,6 @@ class General(commands.Cog, name="general"):
         name="invite",
         description="Get the invite link of the bot to be able to invite it.",
     )
-    @checks.not_blacklisted()
     async def invite(self, context: Context) -> None:
         """
         Get the invite link of the bot to be able to invite it.

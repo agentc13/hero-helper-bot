@@ -34,16 +34,3 @@ def is_owner() -> Callable[[T], T]:
         return True
 
     return commands.check(predicate)
-
-
-def not_blacklisted() -> Callable[[T], T]:
-    """
-    This is a custom check to see if the user executing the command is blacklisted.
-    """
-
-    async def predicate(context: commands.Context) -> bool:
-        if await db_manager.is_blacklisted(context.author.id):
-            raise UserBlacklisted
-        return True
-
-    return commands.check(predicate)

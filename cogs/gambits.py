@@ -56,8 +56,6 @@ class Gambits(commands.Cog, name="gambits"):
         name="gambit",
         description="Selects a random gambit from the gambit list.",
     )
-    # This will only allow non-blacklisted members to execute the command
-    @checks.not_blacklisted()
     async def gambit(self, context: Context):
         """Random roll for gambit effect."""
         result = random.choice(roll_effect)
@@ -73,8 +71,6 @@ class Gambits(commands.Cog, name="gambits"):
         name="gambitlist",
         description="Prints the gambit list.",
     )
-    # This will only allow non-blacklisted members to execute the command
-    @checks.not_blacklisted()
     async def gambitlist(self, context: Context):
         """Sends the Gambit Effect List."""
         embed = discord.Embed(

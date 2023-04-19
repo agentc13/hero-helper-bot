@@ -26,7 +26,6 @@ class Moderation(commands.Cog, name="moderation"):
     )
     @commands.has_guild_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
-    @checks.not_blacklisted()
     @app_commands.describe(amount="The amount of messages that should be deleted.")
     async def purge(self, context: Context, amount: int) -> None:
         """
