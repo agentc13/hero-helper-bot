@@ -74,3 +74,11 @@ async def remove_user_from_waitlist(user_id: int) -> int:
             result = await cursor.fetchone()
             return result[0] if result is not None else 0
 
+
+# async def add_waitlist_to_participants() -> None:
+#     """
+#     This function will add a user based on its ID in the waitlist.
+#     """
+#     async with aiosqlite.connect(DATABASE_PATH) as db:
+#         await db.execute("INSERT INTO participants SELECT user_id AND hr_ign FROM waitlist")
+#         await db.commit()

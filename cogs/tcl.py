@@ -12,6 +12,7 @@ from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
 
+
 from helpers import checks, db_manager
 
 
@@ -138,12 +139,13 @@ class Tcl(commands.Cog, name="tcl"):
     #     name="import_waitlist",
     #     description="Import players from waitlist to participants database."
     # )
-    # async def import_waitlist(self, context: Context,) -> None:
+    # async def import_waitlist(self, context: Context) -> None:
     #     """
+    #     Imports data from waitlist to participants.
     #
-    #     :param context:
-    #     :return:
+    #     :param self: The hybrid command context.
     #     """
+    #     await db_manager.add_waitlist_to_participants()
 
     @commands.hybrid_command(
         name="waitlist",

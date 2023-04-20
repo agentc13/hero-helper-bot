@@ -6,12 +6,12 @@ CREATE TABLE IF NOT EXISTS `waitlist` (
 
 CREATE TABLE IF NOT EXISTS `participants` (
     `participant_id` INTEGER PRIMARY KEY AUTOINCREMENT,
-    `tournament_id` int(9) NOT NULL,
+    `tournament_id` int(9),
     `user_id` varchar(20) NOT NULL,
     `hr_ign` varchar(20) NOT NULL,
-    `checked_in` varchar(5) NOT NULL,
-    `waiting_list` varchar(5) NOT NULL,
-    `active` varchar(5) NOT NULL,
+    `checked_in` varchar(5),
+    `waiting_list` varchar(5) ,
+    `active` varchar(5),
     `seed` int(5),
     `group_id` int(5),
     `wins` int(5),
