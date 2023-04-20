@@ -52,8 +52,8 @@ class Tcl(commands.Cog, name="tcl"):
 
         :param context: The hybrid command context.
         """
-        tcl_users = await db_manager.get_tcl_users()
-        if len(tcl_users) == 0:
+        waitlist = await db_manager.get_waitlist()
+        if len(waitlist) == 0:
             embed = discord.Embed(
                 description="There are currently no Thandar Combat League users.", color=0x992d22
             )
@@ -62,79 +62,88 @@ class Tcl(commands.Cog, name="tcl"):
 
         embed = discord.Embed(title="Thandar Combat League Users", color=0x992d22)
         users = []
-        for tcluser in tcl_users:
-            user = self.bot.get_user(int(tcluser[0])) or await self.bot.fetch_user(
-                int(tcluser[0])
+        for participant in waitlist:
+            user = self.bot.get_user(int(participant[0])) or await self.bot.fetch_user(
+                int(participant[0])
             )
-            users.append(f"• {user.mention}  IGN: {tcluser[1]} - Signed Up <t:{tcluser[2]}>")
+            users.append(f"• {user.mention}  IGN: {participant[1]} - Signed Up <t:{participant[2]}>")
         embed.description = "\n".join(users)
         await context.send(embed=embed)
 
     @tcl.command(
-        base="tcl_list",
+        base="tcl",
         name="add",
-        description="Lets you add a user to Thandar Combat League.",
+        description="Lets you add a user to the Thandar Combat League waitlist.",
     )
-    @app_commands.describe(user="The user that should be added to Thandar Combat League")
+    @app_commands.describe(user="The user that should be added to the Thandar Combat League waitlist.")
     @checks.is_owner()
     async def tcl_add(self, context: Context, user: discord.User, hr_ign: str) -> None:
         """
         Lets you add a user to Thandar Combat League.
 
         :param context: The hybrid command context.
-        :param user: The user that should be added to the Thandar Combat League.
-        :param hr_ign: The Hero Realms In Game Name for the user to be added to Thandar Combat League.
+        :param user: The user that should be added to the Thandar Combat League waitlist.
+        :param hr_ign: The Hero Realms In Game Name for the user to be added to Thandar Combat League waitlist.
         """
         user_id = user.id
         if await db_manager.is_signed_up(user_id):
             embed = discord.Embed(
-                description=f"**{user.name}** is already in Thandar Combat League.",
+                description=f"**{user.name}** is already on the waitlist.",
                 color=0x992d22,
             )
             await context.send(embed=embed)
             return
-        total = await db_manager.add_user_to_tcl(user_id, hr_ign)
+        total = await db_manager.add_user_to_waitlist(user_id, hr_ign)
         embed = discord.Embed(
-            description=f"**{user.name}** has been successfully added to Thandar Combat League",
+            description=f"**{user.name}** has been successfully added to the waitlist",
             color=0x992d22,
         )
         embed.set_footer(
-            text=f"There {'is' if total == 1 else 'are'} now {total} {'user' if total == 1 else 'users'} in "
-                 f"Thandar Combat League"
+            text=f"There {'is' if total == 1 else 'are'} now {total} {'user' if total == 1 else 'users'} on the waitlist."
         )
         await context.send(embed=embed)
 
     @tcl.command(
         base="tcl",
         name="remove",
-        description="Lets you remove a user from Thandar Combat League.",
+        description="Lets you remove a user from the waitlist.",
     )
-    @app_commands.describe(user="The user that should be removed from Thandar Combat League.")
+    @app_commands.describe(user="The user that should be removed from the waitlist.")
     @checks.is_owner()
     async def tcl_remove(self, context: Context, user: discord.User) -> None:
         """
-        Lets you remove a user from Thandar Combat League.
+        Lets you remove a user from the waitlist.
 
         :param context: The hybrid command context.
-        :param user: The user that should be removed from Thandar Combat League.
+        :param user: The user that should be removed from the waitlist.
         """
         user_id = user.id
         if not await db_manager.is_signed_up(user_id):
             embed = discord.Embed(
-                description=f"**{user.name}** is not in Thandar Combat League.", color=0x992d22
+                description=f"**{user.name}** is not on the waitlist.", color=0x992d22
             )
             await context.send(embed=embed)
             return
-        total = await db_manager.remove_user_from_tcl(user_id)
+        total = await db_manager.remove_user_from_waitlist(user_id)
         embed = discord.Embed(
-            description=f"**{user.name}** has been successfully removed from Thandar Combat League.",
+            description=f"**{user.name}** has been successfully removed from the waitlist.",
             color=0x992d22,
         )
         embed.set_footer(
-            text=f"There {'is' if total == 1 else 'are'} now {total} {'user' if total == 1 else 'users'} in "
-                 f"Thandar Combat League."
+            text=f"There {'is' if total == 1 else 'are'} now {total} {'user' if total == 1 else 'users'} on the waitlist."
         )
         await context.send(embed=embed)
+
+    # @commands.hybrid_command(
+    #     name="import_waitlist",
+    #     description="Import players from waitlist to participants database."
+    # )
+    # async def import_waitlist(self, context: Context,) -> None:
+    #     """
+    #
+    #     :param context:
+    #     :return:
+    #     """
 
     @commands.hybrid_command(
         name="waitlist",
@@ -142,7 +151,7 @@ class Tcl(commands.Cog, name="tcl"):
     )
     async def waitlist(self, context: Context, hr_ign: str) -> None:
         """
-        Sign up for Thandar Combat League. You will receive a DM with the rules
+        Sign up for Thandar Combat League waitlist. You will receive a DM with the rules
         link and be added to the list of players for the next season.
 
         :param context: The hybrid command context.
@@ -158,14 +167,14 @@ class Tcl(commands.Cog, name="tcl"):
             user_id = context.author.id
             if await db_manager.is_signed_up(user_id):
                 embed = discord.Embed(
-                    description=f"**{context.author}** is already in Thandar Combat League.",
+                    description=f"**{context.author}** is already on waitlist.",
                     color=0x992d22,
                 )
                 await context.send(embed=embed)
                 return
-            total = await db_manager.add_user_to_tcl(user_id, hr_ign)
+            total = await db_manager.add_user_to_waitlist(user_id, hr_ign)
             embed = discord.Embed(
-                description=f"**{context.author}** has been successfully added to Thandar Combat League",
+                description=f"**{context.author}** has been successfully added to the waitlist.",
                 color=0x992d22,
             )
             embed.set_footer(

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `tcl` (
+CREATE TABLE IF NOT EXISTS `waitlist` (
   `user_id` varchar(20) NOT NULL,
   `hr_ign` varchar(20) NOT NULL ,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `tcl` (
 CREATE TABLE IF NOT EXISTS `participants` (
     `participant_id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `tournament_id` int(9) NOT NULL,
-    `discord_username` varchar(20) NOT NULL ,
+    `user_id` varchar(20) NOT NULL,
     `hr_ign` varchar(20) NOT NULL,
     `checked_in` varchar(5) NOT NULL,
     `waiting_list` varchar(5) NOT NULL,
