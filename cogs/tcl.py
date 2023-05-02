@@ -1,7 +1,5 @@
 """
 Hero-Helper discord bot
-Description:
-A python based discord bot for the Hero Realms community.
 
 Created by agentc13.
 Version: 1.0
@@ -134,18 +132,6 @@ class Tcl(commands.Cog, name="tcl"):
             text=f"There {'is' if total == 1 else 'are'} now {total} {'user' if total == 1 else 'users'} on the waitlist."
         )
         await context.send(embed=embed)
-
-    # @commands.hybrid_command(
-    #     name="import_waitlist",
-    #     description="Import players from waitlist to participants database."
-    # )
-    # async def import_waitlist(self, context: Context) -> None:
-    #     """
-    #     Imports data from waitlist to participants.
-    #
-    #     :param self: The hybrid command context.
-    #     """
-    #     await db_manager.add_waitlist_to_participants()
 
     @commands.hybrid_command(
         name="waitlist",

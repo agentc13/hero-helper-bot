@@ -1,7 +1,5 @@
 """
 Hero-Helper discord bot
-Description:
-A python based discord bot for the Hero Realms community.
 
 Created by agentc13.
 Version: 1.0
@@ -33,6 +31,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 # sets bot command prefix and loads intents for bot
+# noinspection PyTypeChecker
 bot = Bot(
     command_prefix=commands.when_mentioned_or(config["prefix"]),
     intents=intents,

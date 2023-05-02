@@ -21,10 +21,12 @@ Add meme commands. (ala carl-bot)
 Alt-art commands. (ala carl-bot)
 Card lookup commands. (host image on server instead of web-scraping? Have cards for each class and add stuff from beta).
 Command to add cards to lookup database.
-On-Demand tournament (16 player single elim). Could use gambits for some flare for each event/match.
+On-Demand tournament (16 player single elim). Could use gambits for each event/match (make toggle for this?).
 TO Helper (allow organizers to set up league/tournament through discord with various formats).
+Database setup commands part of TO helper.
 Allow admins/mods to add simple commands to add to memes/alt art card commands. (ala carl-bot)
 Twitch/Youtube/etc announcements?
+
 
 
 
@@ -53,7 +55,7 @@ Checks last season db and removes players that have not checked in to come back.
 Integrates waitlist into new season db. (starting at lowest division)
 Fills in rest of division slots starting at the top divisions based on last seasons stats. (when people drop).
 
-Move Playeer command:
+Move Player command:
 Moves player to a specified division.
 
 Manual Player Edit command:

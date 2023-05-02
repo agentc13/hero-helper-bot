@@ -1,7 +1,5 @@
 """
 Hero-Helper discord bot
-Description:
-A python based discord bot for the Hero Realms community.
 
 Created by agentc13.
 Version: 1.0
@@ -10,11 +8,9 @@ Version: 1.0
 import json
 import os
 from typing import Callable, TypeVar
-
 from discord.ext import commands
 
 from exceptions import *
-from helpers import db_manager
 
 T = TypeVar("T")
 

@@ -1,7 +1,5 @@
 """
 Hero-Helper discord bot
-Description:
-A python based discord bot for the Hero Realms community.
 
 Created by agentc13.
 Version: 1.0
