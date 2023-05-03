@@ -22,6 +22,7 @@ else:
 # sets intents for bot
 intents = discord.Intents.default()
 intents.message_content = True
+intents.members = True
 
 # sets bot command prefix and loads intents for bot
 # noinspection PyTypeChecker
