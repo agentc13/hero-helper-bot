@@ -1,10 +1,3 @@
-"""
-Hero-Helper discord bot
-
-Created by agentc13.
-Version: 1.0
-"""
-
 import asyncio
 import json
 import logging

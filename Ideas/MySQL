@@ -1,0 +1,33 @@
+import discord
+from discord.ext import commands
+import mysql.connector
+
+mydb = mysql.connector.connect(
+  host="localhost",
+  user="yourusername",
+  password="yourpassword",
+  database="yourdatabase"
+)
+
+bot = commands.Bot(command_prefix='!')
+
+@bot.command()
+async def create_tournament(ctx, name, *participants):
+    # Insert the tournament into the database
+    cursor = mydb.cursor()
+    cursor.execute("INSERT INTO tournaments (name, type) VALUES (%s, %s)", (name, "round-robin"))
+    tournament_id = cursor.lastrowid
+    for participant in participants:
+        cursor.execute("INSERT INTO participants (tournament_id, name, score) VALUES (%s, %s, 0)", (tournament_id, participant))
+    mydb.commit()
+
+@bot.command()
+async def join_tournament(ctx, name, participant):
+    # Insert the participant into the database
+    cursor = mydb.cursor()
+    cursor.execute("SELECT id FROM tournaments WHERE name = %s AND type = 'round-robin'", (name,))
+    row = cursor.fetchone()
+    if row:
+        tournament_id = row[0]
+        cursor.execute("INSERT INTO participants (tournament_id, name, score) VALUES (%s, %s, 0)", (tournament_id, participant))
+        mydb.commit()

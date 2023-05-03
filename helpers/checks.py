@@ -1,10 +1,3 @@
-"""
-Hero-Helper discord bot
-
-Created by agentc13.
-Version: 1.0
-"""
-
 import json
 import os
 from typing import Callable, TypeVar

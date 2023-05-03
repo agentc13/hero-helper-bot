@@ -9,11 +9,10 @@ CREATE TABLE IF NOT EXISTS `participants` (
     `tournament_id` int(9),
     `user_id` varchar(20) NOT NULL,
     `hr_ign` varchar(20) NOT NULL,
-    `checked_in` varchar(5),
     `waiting_list` varchar(5) ,
     `active` varchar(5),
-    `seed` int(5),
     `group_id` int(5),
+    `seed` int(5),
     `wins` int(5),
     `losses` int(5)
 );

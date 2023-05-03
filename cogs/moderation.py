@@ -1,11 +1,3 @@
-"""
-Hero-Helper discord bot
-
-Created by agentc13.
-Version: 1.0
-"""
-
-
 from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
