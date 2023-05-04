@@ -20,7 +20,7 @@ else:
         config = json.load(file)
 
 # sets intents for bot
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.message_content = True
 intents.members = True
 
