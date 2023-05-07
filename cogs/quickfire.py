@@ -64,8 +64,8 @@ class Quickfire(commands.Cog, name="quickfire"):
         # Get the list of all tournaments
         tournaments = challonge.tournaments.index(state='all')
 
-        # Find the tournament by its player_name
-        tournament = next((t for t in tournaments if t['player_name'] == tournament_name), None)
+        # Find the tournament by its name
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
         if tournament is None:
             embed = discord.Embed(title='Error!',
                                   description=f'Tournament "{tournament_name}" not found.',
@@ -80,7 +80,7 @@ class Quickfire(commands.Cog, name="quickfire"):
                                       color=0xa84300)
                 await context.send(embed=embed)
                 if num_participants == 16:
-                    # Start the tournament and create a new tournament with the same player_name
+                    # Start the tournament and create a new tournament with the same name
                     challonge.participants.randomize(tournament['id'])
                     challonge.tournaments.start(tournament['id'])
                     new_tournament_name = f'{tournament_name}{len(tournaments) + 1}'
@@ -101,7 +101,7 @@ class Quickfire(commands.Cog, name="quickfire"):
                 participant = challonge.participants.create(tournament['id'], participant_name.content)
                 num_participants += 1
                 if num_participants == 16:
-                    # Start the tournament and create a new tournament with the same player_name
+                    # Start the tournament and create a new tournament with the same name
                     challonge.tournaments.start(tournament['id'])
                     new_tournament_name = f'{tournament_name}{len(tournaments) + 1}'
                     unique_url = f"{tournament_name}{int(time.time())}"  # Add this line to create a unique URL
@@ -115,7 +115,7 @@ class Quickfire(commands.Cog, name="quickfire"):
 
                 else:
                     embed = discord.Embed(title="Participant Added",
-                                          description=f'Participant "{participant["player_name"]}" has been added to tournament "{tournament_name}"',
+                                          description=f'Participant "{participant["name"]}" has been added to tournament "{tournament_name}"',
                                           color=0x1f8b4c)
                     await context.send(embed=embed)
                     # Gives user the Quickfire Role
@@ -132,10 +132,10 @@ class Quickfire(commands.Cog, name="quickfire"):
         Lists participants in a specific Quickfire tournament.
 
         :param context: The hybrid command context.
-        :param tournament_name: Tournament player_name.
+        :param tournament_name: Tournament name.
         """
         tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['player_name'] == tournament_name), None)
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
         if tournament is None:
             embed = discord.Embed(title='Error!',
                                   description=f'Tournament "{tournament_name}" not found.',
@@ -143,7 +143,7 @@ class Quickfire(commands.Cog, name="quickfire"):
             await context.send(embed=embed)
         else:
             participants = challonge.participants.index(tournament['id'])
-            participant_names = [p['player_name'] for p in participants]
+            participant_names = [p['name'] for p in participants]
             participant_list = '\n'.join(participant_names)
             embed = discord.Embed(title=f'Participants in tournament "{tournament_name}"',
                                   description=participant_list,
@@ -163,7 +163,7 @@ class Quickfire(commands.Cog, name="quickfire"):
         :param tournament_name: Name of tournament whose matches will be returned.
         """
         tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['player_name'] == tournament_name), None)
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
         if tournament is None:
             embed = discord.Embed(title='Error!',
                                   description=f'Tournament "{tournament_name}" not found.',
@@ -176,8 +176,8 @@ class Quickfire(commands.Cog, name="quickfire"):
             bracket = []
             for match in matches:
                 if match['player1_id'] is not None and match['player2_id'] is not None:
-                    p1_name = participant_ids[match['player1_id']]['player_name']
-                    p2_name = participant_ids[match['player2_id']]['player_name']
+                    p1_name = participant_ids[match['player1_id']]['name']
+                    p2_name = participant_ids[match['player2_id']]['name']
                 else:
                     p1_name = "TBD"
                     p2_name = "TBD"
@@ -201,10 +201,10 @@ class Quickfire(commands.Cog, name="quickfire"):
         Display the tournament bracket for the specified tournament.
 
         :param context: The command context.
-        :param tournament_name: Tournament player_name.
+        :param tournament_name: Tournament name.
         """
         tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['player_name'] == tournament_name), None)
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
 
         if tournament is None:
             await context.send(f'Tournament "{tournament_name}" not found')
@@ -229,10 +229,10 @@ class Quickfire(commands.Cog, name="quickfire"):
         Display the tournament bracket image for the specified tournament by taking a screenshot.
 
         :param context: The command context.
-        :param tournament_name: Tournament player_name.
+        :param tournament_name: Tournament name.
         """
         tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['player_name'] == tournament_name), None)
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
 
         if tournament is None:
             embed = discord.Embed(title='Error!',
@@ -295,7 +295,7 @@ class Quickfire(commands.Cog, name="quickfire"):
                               description='All the tournaments currently hosted',
                               color=0xa84300)
         for tournament in tournaments:
-            embed.add_field(name=tournament['player_name'],
+            embed.add_field(name=tournament['name'],
                             value=f"Status: {tournament['state']}",
                             inline=False)
         await context.send(embed=embed)
@@ -310,13 +310,13 @@ class Quickfire(commands.Cog, name="quickfire"):
         Report the result of a match in the specified Quickfire tournament using the round number.
 
         :param context: The hybrid command context.
-        :param tournament_name: Tournament player_name.
+        :param tournament_name: Tournament name.
         :param round_number: Round number of the match.
         :param winner: Name of the winner.
         """
-        # Fetch all tournaments and find the one with the specified player_name
+        # Fetch all tournaments and find the one with the specified name
         tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['player_name'] == tournament_name), None)
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
 
         # If the tournament is not found, send an error message
         if tournament is None:
@@ -342,7 +342,7 @@ class Quickfire(commands.Cog, name="quickfire"):
                 participants = challonge.participants.index(tournament['id'])
 
                 # Find the winner in the list of participants
-                winner_participant = next((p for p in participants if p["player_name"] == winner), None)
+                winner_participant = next((p for p in participants if p["name"] == winner), None)
 
                 # If the winner is not found in the list of participants, send an error message
                 if winner_participant is None:
@@ -396,7 +396,7 @@ class Quickfire(commands.Cog, name="quickfire"):
                             # Create an embed with the winner's information
                             embed = discord.Embed(
                                 title=f'Tournament "{tournament_name}" is complete!',
-                                description=f'Congratulations to the winner: {final_winner["player_name"]}',
+                                description=f'Congratulations to the winner: {final_winner["name"]}',
                                 color=0x1f8b4c
                             )
                             await context.send(embed=embed)
@@ -418,8 +418,8 @@ class Quickfire(commands.Cog, name="quickfire"):
         # Get the list of all tournaments
         tournaments = challonge.tournaments.index(state='all')
 
-        # Find the tournament by its player_name
-        tournament = next((t for t in tournaments if t['player_name'] == tournament_name), None)
+        # Find the tournament by its name
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
 
         if tournament is None:
             embed = discord.Embed(title='Error!',
@@ -430,7 +430,7 @@ class Quickfire(commands.Cog, name="quickfire"):
             # If the tournament exists, check the number of participants
             participant = challonge.participants.create(tournament['id'], player_name)
             embed = discord.Embed(title="Participant Added",
-                                  description=f'Participant {participant["player_name"]} added to tournament {tournament["player_name"]}',
+                                  description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
                                   color=0x1f8b4c)
             await context.send(embed=embed)
 
@@ -442,7 +442,7 @@ class Quickfire(commands.Cog, name="quickfire"):
                                       color=0xa84300)
                 await context.send(embed=embed)
                 if num_participants == 16:
-                    # Start the tournament and create a new tournament with the same player_name
+                    # Start the tournament and create a new tournament with the same name
                     challonge.participants.randomize(tournament['id'])
                     challonge.tournaments.start(tournament['id'])
                     new_tournament_name = f'{tournament_name}{len(tournaments) + 1}'

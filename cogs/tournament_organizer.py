@@ -73,13 +73,13 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
     @commands.has_role("Tournament Organizer")
     async def remove_tournament(self, context: Context, tournament_name: str):
         """
-        Removes a Quickfire tournament by player_name.
+        Removes a Quickfire tournament by name.
 
         :param context: The hybrid command context.
-        :param tournament_name: Tournament player_name.
+        :param tournament_name: Tournament name.
         """
         tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['player_name'] == tournament_name), None)
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
         if tournament is None:
             embed = discord.Embed(title='Error',
                                   description=f'Tournament "{tournament_name}" not found',
@@ -108,8 +108,8 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
         # Get the list of all tournaments
         tournaments = challonge.tournaments.index(state='all')
 
-        # Find the tournament by its player_name
-        tournament = next((t for t in tournaments if t['player_name'] == tournament_name), None)
+        # Find the tournament by its name
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
 
         if tournament is None:
             embed = discord.Embed(title='Error!',
@@ -122,7 +122,7 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
 
             challonge.tournaments.start(tournament['id'])
             embed = discord.Embed(title="Tournament Started",
-                                  description=f'Tournament {tournament["player_name"]} has been started',
+                                  description=f'Tournament {tournament["name"]} has been started',
                                   color=0x206694)
             await context.send(embed=embed)
 
@@ -133,13 +133,13 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
     @commands.has_role("Tournament Organizer")
     async def reset_tournament(self, context: Context, tournament_name: str):
         """
-        Resets a tournament by its player_name.
+        Resets a tournament by its name.
 
         :param context: The hybrid command context.
-        :param tournament_name: Tournament player_name.
+        :param tournament_name: Tournament name.
         """
         tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['player_name'] == tournament_name), None)
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
 
         if tournament is None:
             embed = discord.Embed(title='Error',
@@ -165,13 +165,13 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
 
         :param context: The hybrid command context.
         :param tournament_name: Name of the tournament.
-        :param player_name: Discord player_name of player to add.
+        :param player_name: Discord name of player to add.
         """
         # Get the list of all tournaments
         tournaments = challonge.tournaments.index(state='all')
 
-        # Find the tournament by its player_name
-        tournament = next((t for t in tournaments if t['player_name'] == tournament_name), None)
+        # Find the tournament by its name
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
 
         if tournament is None:
             embed = discord.Embed(title='Error!',
@@ -182,7 +182,7 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
             # If the tournament exists, add the participant.
             participant = challonge.participants.create(tournament['id'], player_name)
             embed = discord.Embed(title="Participant Added",
-                                  description=f'Participant {participant["player_name"]} added to tournament {tournament["player_name"]}',
+                                  description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
                                   color=0x1f8b4c)
             await context.send(embed=embed)
 
@@ -191,16 +191,16 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
         description="Removes a player from a tournament.",
     )
     @commands.has_role("Tournament Organizer")
-    async def remove_player(self, context: Context, tournament_name: str, player_name: str):
+    async def remove_player(self, context: Context, tournament_name: str, name: str):
         """
         Remove a player from the specified tournament.
 
         :param context: The command context.
         :param tournament_name: Tournament player_name.
-        :param player_name: Name of the player to remove.
+        :param name: Name of the player to remove.
         """
         tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['player_name'] == tournament_name), None)
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
 
         if tournament is None:
             embed = discord.Embed(title='Error!',
@@ -212,19 +212,19 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
             participants = challonge.participants.index(tournament['id'])
 
             # Find the player in the list of participants
-            player_participant = next((p for p in participants if p["player_name"] == player_name), None)
+            player_participant = next((p for p in participants if p["name"] == name), None)
 
             if player_participant is None:
                 embed = discord.Embed(title='Error!',
-                                      description=f'Player "{player_name}" not found in the list of participants.',
+                                      description=f'Player "{name}" not found in the list of participants.',
                                       color=0xe74c3c)
                 await context.send(embed=embed)
             else:
                 # Remove the player from the tournament
                 challonge.participants.destroy(tournament['id'], player_participant['id'])
-                await context.send(f'Player "{player_name}" has been removed from tournament "{tournament_name}"')
+                await context.send(f'Player "{name}" has been removed from tournament "{tournament_name}"')
                 embed = discord.Embed(title='Removed.',
-                                      description=f'Player "{player_name}" has been removed from {tournament_name}.',
+                                      description=f'Player "{name}" has been removed from {tournament_name}.',
                                       color=0x71368a)
                 await context.send(embed=embed)
 
@@ -238,10 +238,10 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
         Finalize the specified tournament manually.
 
         :param context: The command context.
-        :param tournament_name: Tournament player_name.
+        :param tournament_name: Tournament name.
         """
         tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['player_name'] == tournament_name), None)
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
 
         if tournament is None:
             embed = discord.Embed(title='Error!',
@@ -266,7 +266,7 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
                 # Create an embed with the winner's information
                 embed = discord.Embed(
                     title=f'Tournament "{tournament_name}" is complete!',
-                    description=f'Congratulations to the winner: {winner_participant["player_name"]}',
+                    description=f'Congratulations to the winner: {winner_participant["name"]}',
                     color=0x71368a
                 )
                 await context.send(embed=embed)

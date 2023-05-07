@@ -89,14 +89,14 @@ class Owner(commands.Cog, name="owner"):
         name="load",
         description="Load a cog",
     )
-    @app_commands.describe(cog="The player_name of the cog to load")
+    @app_commands.describe(cog="The name of the cog to load")
     @checks.is_owner()
     async def load(self, context: Context, cog: str) -> None:
         """
         The bot will load the given cog.
 
         :param context: The hybrid command context.
-        :param cog: The player_name of the cog to load.
+        :param cog: The name of the cog to load.
         """
         try:
             await self.bot.load_extension(f"cogs.{cog}")
@@ -115,14 +115,14 @@ class Owner(commands.Cog, name="owner"):
         name="unload",
         description="Unloads a cog.",
     )
-    @app_commands.describe(cog="The player_name of the cog to unload")
+    @app_commands.describe(cog="The name of the cog to unload")
     @checks.is_owner()
     async def unload(self, context: Context, cog: str) -> None:
         """
         The bot will unload the given cog.
 
         :param context: The hybrid command context.
-        :param cog: The player_name of the cog to unload.
+        :param cog: The name of the cog to unload.
         """
         try:
             await self.bot.unload_extension(f"cogs.{cog}")
@@ -141,14 +141,14 @@ class Owner(commands.Cog, name="owner"):
         name="reload",
         description="Reloads a cog.",
     )
-    @app_commands.describe(cog="The player_name of the cog to reload")
+    @app_commands.describe(cog="The name of the cog to reload")
     @checks.is_owner()
     async def reload(self, context: Context, cog: str) -> None:
         """
         The bot will reload the given cog.
 
         :param context: The hybrid command context.
-        :param cog: The player_name of the cog to reload.
+        :param cog: The name of the cog to reload.
         """
         try:
             await self.bot.reload_extension(f"cogs.{cog}")
