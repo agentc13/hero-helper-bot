@@ -9,8 +9,6 @@ import tempfile
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 
-from helpers import checks
-
 
 # Define the Quickfire class, which is a subclass of commands.Cog
 class Quickfire(commands.Cog, name="quickfire"):
@@ -403,100 +401,12 @@ class Quickfire(commands.Cog, name="quickfire"):
                             )
                             await context.send(embed=embed)
 
-
-    # Define the create_tournament command, which allows a user to create a new tournament
-    @qf.command(
-        name="create_tournament",
-        description="Allows a Tournament Organizer to create a new tournament",
-    )
-    @checks.is_owner()
-    async def create_tournament(self, context: Context, name: str):
-        """
-        Creates a Quickfire tournament in Challonge.
-
-        :param context: The hybrid command context.
-        :param name: Name of tournament.
-        """
-        new_tournament_name = f'{name}'
-        unique_url = f"{name}{int(time.time())}"  # Create a unique URL
-        new_tournament = challonge.tournaments.create(new_tournament_name,
-                                                      url=unique_url,
-                                                      game_name="Hero Realms Digital")
-        embed = discord.Embed(title="Tournament Created",
-                              description=f"Name: {new_tournament_name}\nURL: {unique_url}\nGame: Hero Realms Digital",
-                              color=0xc27c0e)
-        await context.send(embed=embed)
-        role = discord.utils.get(context.guild.roles, id=1104624377313624066)
-        await context.send(
-            f'{role.mention} \nSign ups for  "{new_tournament_name}" are open! Use the "/qf signup {new_tournament_name}" command to join!')
-
-    # Define the remove_tournament command, which allows a tournament organizer to delete a tournament
-    @qf.command(
-        name="remove_tournament",
-        description="Allows TO to delete a Quickfire tournament.",
-    )
-    @checks.is_owner()
-    async def remove_tournament(self, context: Context, tournament_name: str):
-        """
-        Removes a Quickfire tournament by name.
-
-        :param context: The hybrid command context.
-        :param tournament_name: Tournament name.
-        """
-        tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
-        if tournament is None:
-            embed = discord.Embed(title='Error',
-                                  description=f'Tournament "{tournament_name}" not found',
-                                  color=0xe74c3c)
-            await context.send(embed=embed)
-        else:
-            challonge.tournaments.destroy(tournament['id'])
-            embed = discord.Embed(title='Tournament Removed',
-                                  description=f'{tournament_name} has been removed from active tournaments.',
-                                  color=0xc27c0e)
-            await context.send(embed=embed)
-
-    # Define the start_tournament command, which allows a tournament organizer to start a tournament
-    @qf.command(
-        name="start_tournament",
-        description="Allows TO to start tournament",
-    )
-    @checks.is_owner()
-    async def start_tournament(self, context: Context, tournament_name: str):
-        """
-        Allows a Tournament Organizer to start a specific Quickfire tournament.
-
-        :param context: The hybrid command context.
-        :param tournament_name: Name of the tournament.
-        """
-        # Get the list of all tournaments
-        tournaments = challonge.tournaments.index(state='all')
-
-        # Find the tournament by its name
-        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
-
-        if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'Tournament "{tournament_name}" not found.',
-                                  color=0xe74c3c)
-            await context.send(embed=embed)
-        else:
-            # Randomize seeds before starting the tournament
-            challonge.participants.randomize(tournament['id'])
-
-            challonge.tournaments.start(tournament['id'])
-            embed = discord.Embed(title="Tournament Started",
-                                  description=f'Tournament {tournament["name"]} has been started',
-                                  color=0x206694)
-            await context.send(embed=embed)
-
-    # Define the add_participant command, which allows a tournament organizer to add a player to a tournament
+    # Define the add_player command which allows a Tournament Organizer to add a player to Quickfire tournaments manually.
     @qf.command(
         name="add_player",
         description="Allows TO to manually add a player to a Quickfire tournament",
     )
-    @checks.is_owner()
+    @commands.has_role("Tournament Organizer")
     async def add_player(self, context: Context, tournament_name: str, name: str):
         """
         Add player to tournament.
@@ -539,99 +449,11 @@ class Quickfire(commands.Cog, name="quickfire"):
                     unique_url = f"{tournament_name}{int(time.time())}"  # Add this line to create a unique URL
                     new_tournament = challonge.tournaments.create(new_tournament_name,
                                                                   url=unique_url,
-                                                                  game_name="Hero Realms Digital") # Add url=unique_url parameter
+                                                                  game_name="Hero Realms Digital")  # Add url=unique_url parameter
                     embed = discord.Embed(title='Full Tournament',
                                           description=f'Tournament "{tournament_name}" has started! A new tournament "{new_tournament_name}" has been created.',
                                           color=0xe67e22)
                     await context.send(embed=embed)
-
-    @qf.command(
-        name="finalize",
-        description="Manually finalizes a tournament.",
-    )
-    async def finalize(self, context: Context, tournament_name: str):
-        """
-        Finalize the specified tournament manually.
-
-        :param context: The command context.
-        :param tournament_name: Tournament name.
-        """
-        tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
-
-        if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'Tournament "{tournament_name}" not found.',
-                                  color=0xe74c3c)
-            await context.send(embed=embed)
-        else:
-            # Finalize the tournament
-            challonge.tournaments.finalize(tournament['id'])
-
-            # Refresh tournament data
-            tournament = challonge.tournaments.show(tournament['id'])
-
-            if tournament['state'] == 'complete':
-                # Get participants
-                participants = challonge.participants.index(tournament['id'])
-
-                # Find the winner in the list of participants
-                winner_id = tournament['winner_id']
-                winner_participant = next((p for p in participants if p["id"] == winner_id), None)
-
-                # Create an embed with the winner's information
-                embed = discord.Embed(
-                    title=f'Tournament "{tournament_name}" is complete!',
-                    description=f'Congratulations to the winner: {winner_participant["name"]}',
-                    color=0x71368a
-                )
-                await context.send(embed=embed)
-            else:
-                embed = discord.Embed(title='Error!',
-                                      description=f'Tournament "{tournament_name}" cannot be finalized.',
-                                      color=0xe74c3c)
-                await context.send(embed=embed)
-
-    @qf.command(
-        name="remove_player",
-        description="Removes a player from a tournament.",
-    )
-    async def remove_player(self, context: Context, tournament_name: str, player_name: str):
-        """
-        Remove a player from the specified tournament.
-
-        :param context: The command context.
-        :param tournament_name: Tournament name.
-        :param player_name: Name of the player to remove.
-        """
-        tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
-
-        if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'Tournament "{tournament_name}" not found.',
-                                  color=0xe74c3c)
-            await context.send(embed=embed)
-        else:
-            # Get participants
-            participants = challonge.participants.index(tournament['id'])
-
-            # Find the player in the list of participants
-            player_participant = next((p for p in participants if p["name"] == player_name), None)
-
-            if player_participant is None:
-                embed = discord.Embed(title='Error!',
-                                      description=f'Player "{player_name}" not found in the list of participants.',
-                                      color=0xe74c3c)
-                await context.send(embed=embed)
-            else:
-                # Remove the player from the tournament
-                challonge.participants.destroy(tournament['id'], player_participant['id'])
-                await context.send(f'Player "{player_name}" has been removed from tournament "{tournament_name}"')
-                embed = discord.Embed(title='Removed.',
-                                      description=f'Player "{player_name}" has been removed from {tournament_name}.',
-                                      color=0x71368a)
-                await context.send(embed=embed)
 
 
 # Define the setup function, which adds the Quickfire cog to the Hero-Helper Bot

@@ -241,6 +241,11 @@ async def on_command_error(context: Context, error) -> None:
             color=0xE02B2B,
         )
         await context.send(embed=embed)
+    elif isinstance(error, commands.MissingRole):
+        embed = discord.Embed(title='Error!',
+                              description='You do not have the required role to use this command.',
+                              color=0xe74c3c)
+        await context.send(embed=embed)
     else:
         raise error
 
