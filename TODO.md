@@ -22,6 +22,11 @@ Promote/demote automation (auto assigns division roles?) - TO
 
 **Quickfire:**
 Add automation
+Remove owner checks
+Add Tournament Organizer role checks
+Add reset command- TO
+Add "Hero Realms Digital" as the game when creating tournaments
+Add checks when signing up that name matches IGN
 
 
 **SRDO:**

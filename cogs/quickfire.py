@@ -83,6 +83,7 @@ class Quickfire(commands.Cog, name="quickfire"):
                 await context.send(embed=embed)
                 if num_participants == 16:
                     # Start the tournament and create a new tournament with the same name
+                    challonge.participants.randomize(tournament['id'])
                     challonge.tournaments.start(tournament['id'])
                     new_tournament_name = f'{tournament_name} ({len(tournaments) + 1})'
                     unique_url = f"{tournament_name}{int(time.time())}"  # Add this line to create a unique URL
@@ -396,6 +397,7 @@ class Quickfire(commands.Cog, name="quickfire"):
                                 color=0x1f8b4c
                             )
                             await context.send(embed=embed)
+
 
     # Define the create_tournament command, which allows a user to create a new tournament
     @qf.command(
