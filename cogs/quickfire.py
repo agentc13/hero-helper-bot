@@ -4,10 +4,8 @@ import time
 from discord.ext import commands
 from discord.ext.commands import Context
 from tabulate import tabulate
-import aiohttp
 import os
 import tempfile
-from io import BytesIO
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -53,6 +51,7 @@ class Quickfire(commands.Cog, name="quickfire"):
             await context.send(embed=embed)
 
     # Define the signup command, which allows a user to sign up for a tournament
+    # noinspection PyArgumentList
     @qf.command(
         name="signup",
         description="Allows user to sign up for the current Quickfire tournament",
@@ -187,6 +186,34 @@ class Quickfire(commands.Cog, name="quickfire"):
             embed.add_field(name='Player 1', value='\n'.join([b[1] for b in bracket]))
             embed.add_field(name='Player 2', value='\n'.join([b[2] for b in bracket]))
     
+            await context.send(embed=embed)
+
+    @qf.command(
+        name="bracket_link",
+        description="Displays the tournament bracket from Challonge.",
+    )
+    async def bracket_link(self, context: Context, tournament_name: str):
+        """
+        Display the tournament bracket for the specified tournament.
+
+        :param context: The command context.
+        :param tournament_name: Tournament name.
+        """
+        tournaments = challonge.tournaments.index(state='all')
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
+
+        if tournament is None:
+            await context.send(f'Tournament "{tournament_name}" not found')
+        else:
+            # Get the tournament URL
+            tournament_url = tournament['full_challonge_url']
+
+            # Create an embed with the tournament bracket URL
+            embed = discord.Embed(
+                title=f'Tournament Bracket for "{tournament_name}"',
+                description=f'[View the bracket here]({tournament_url})',
+                color=0x71368a
+            )
             await context.send(embed=embed)
 
     @qf.command(
@@ -446,6 +473,9 @@ class Quickfire(commands.Cog, name="quickfire"):
                                   color=0xe74c3c)
             await context.send(embed=embed)
         else:
+            # Randomize seeds before starting the tournament
+            challonge.participants.randomize(tournament['id'])
+
             challonge.tournaments.start(tournament['id'])
             embed = discord.Embed(title="Tournament Started",
                                   description=f'Tournament {tournament["name"]} has been started',

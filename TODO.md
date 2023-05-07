@@ -21,7 +21,7 @@ Division standings command (also shows current/outstanding matches) - participan
 Promote/demote automation (auto assigns division roles?) - TO
 
 **Quickfire:**
-Randomize seeds - TO
+Add automation
 
 
 **SRDO:**
