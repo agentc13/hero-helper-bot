@@ -21,6 +21,7 @@ Promote/demote automation (auto assigns division roles?) - TO
 
 **Quickfire:**
 Add checks when signing up that name matches IGN
+Make signup, show_tournaments, show_matches, show_players, report just show QF info.
 
 
 **SRDO:**

@@ -37,13 +37,13 @@ class Quickfire(commands.Cog, name="quickfire"):
                             "`signup` - Sign up for the currently open Quickfire tournament.\n"
                             "`show_players` - Lists the players signed up for a specific Quickfire tournament.\n"
                             "`show_tournaments` - Lists the Quickfire tournaments that are open or in progress.\n"
-                            "`show_matches` - Lists the matches in a specific Quickfire tournament.\n"
+                            "`show_matches` - Lists the matches in a specified Quickfire tournament.\n"
+                            "`bracket_link` - Posts the link to a Quickfire tournament bracket in Challonge.\n"
+                            "`bracket` - Posts screenshot of current Challonge bracket for a specified Quickfire tournament.\n"
                             "`report` - Allows user to report a match result for a specific Quickfire tournament.\n\n"
                             "**Tournament Organizer Only**\n"
-                            "`create_tournament` - Creates a Quickfire tournament in Challonge.\n"
-                            "`remove_tournament` - Deletes a Quickfire tournament from Challonge.\n"
-                            "`start_tournament` - Starts a specific Quickfire tournament in Challonge.\n"
-                            "`add_player` - Allows a Tournament Organizer to manually add a player to a Quickfire tournament.\n",
+                            "`create_tournament` - Creates a Quickfire tournament in Challonge.\n",
+
                 color=0x992d22,
             )
             await context.send(embed=embed)
@@ -314,6 +314,8 @@ class Quickfire(commands.Cog, name="quickfire"):
         :param round_number: Round number of the match.
         :param winner: Name of the winner.
         """
+
+        await context.defer()
         # Fetch all tournaments and find the one with the specified name
         tournaments = challonge.tournaments.index(state='all')
         tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
