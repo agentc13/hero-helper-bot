@@ -1,11 +1,7 @@
 import discord
-import challonge
-import time
 from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
-from tabulate import tabulate
-
 
 from helpers import checks, db_manager
 
@@ -168,30 +164,6 @@ class Tcl(commands.Cog, name="tcl"):
             await context.send(embed=embed)
         except discord.Forbidden:
             await context.send(embed=embed)
-
-    @commands.hybrid_command(
-        name="create_rr_tournament",
-        description="Allows user to create a new round robin tournament",
-    )
-    async def create_rr_tournament(self, context: Context, name: str):
-        """
-        Creates Challonge round robin tournament
-
-        :param context: The hybrid command context.
-        :param name: Name of tournament.
-        """
-        new_tournament_name = f'{name}'
-        unique_url = f"{name}{int(time.time())}"  # Create a unique URL
-        new_tournament = challonge.tournaments.create(new_tournament_name,
-                                                      url=unique_url,
-                                                      tournament_type="round robin")
-        await context.send(
-            f'Round robin tournament "{new_tournament_name}" has started! A new tournament "{new_tournament_name}" has been created.')
-        embed = discord.Embed(title="Round Robin Tournament Created",
-                              description=f"Name: {new_tournament_name}\nURL: {unique_url}",
-                              color=0xc27c0e)
-        await context.send(embed=embed)
-
 
 
 async def setup(bot):

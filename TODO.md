@@ -20,10 +20,6 @@ Division standings command (also shows current/outstanding matches) - participan
 Promote/demote automation (auto assigns division roles?) - TO
 
 **Quickfire:**
-Add automation
-Remove owner checks
-Add Tournament Organizer role checks
-Add reset command- TO
 Add checks when signing up that name matches IGN
 
 

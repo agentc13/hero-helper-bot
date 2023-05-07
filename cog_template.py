@@ -4,7 +4,7 @@ from discord.ext.commands import Context
 from helpers import checks
 
 
-# Here we name the cog and create a new class for the cog.
+# Here we player_name the cog and create a new class for the cog.
 class Template(commands.Cog, name="template"):
     def __init__(self, bot):
         self.bot = bot
