@@ -315,7 +315,6 @@ class Quickfire(commands.Cog, name="quickfire"):
         :param winner: Name of the winner.
         """
 
-        await context.defer()
         # Fetch all tournaments and find the one with the specified name
         tournaments = challonge.tournaments.index(state='all')
         tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
@@ -328,9 +327,22 @@ class Quickfire(commands.Cog, name="quickfire"):
                 color=0xe74c3c)
             await context.send(embed=embed)
         else:
-            # Fetch all matches in the tournament and find the one with the specified round number and open state
-            matches = challonge.matches.index(tournament['id'], state='all')
-            match = next((m for m in matches if m['round'] == round_number and m['state'] == 'open'), None)
+            # Fetch all matches in the tournament
+            matches = challonge.matches.index(tournament['id'], state='open')
+
+            # Get participants of the tournament
+            participants = challonge.participants.index(tournament['id'])
+
+            # Find the winner in the list of participants
+            winner_participant = next((p for p in participants if p["name"] == winner), None)
+
+            # Determine the winner's ID
+            winner_id = winner_participant['id']
+
+            # Find the match which is the correct round and includes the winner id
+            match = next((m for m in matches if m['round'] == round_number and (
+                        m['player1_id'] == winner_id or m['player2_id'] == winner_id)), None)
+            print(match)
 
             # If the match is not found or already completed, send an error message
             if match is None:
@@ -340,12 +352,6 @@ class Quickfire(commands.Cog, name="quickfire"):
                     color=0xe74c3c)
                 await context.send(embed=embed)
             else:
-                # Get participants of the tournament
-                participants = challonge.participants.index(tournament['id'])
-
-                # Find the winner in the list of participants
-                winner_participant = next((p for p in participants if p["name"] == winner), None)
-
                 # If the winner is not found in the list of participants, send an error message
                 if winner_participant is None:
                     embed = discord.Embed(
@@ -354,9 +360,6 @@ class Quickfire(commands.Cog, name="quickfire"):
                         color=0xe74c3c)
                     await context.send(embed=embed)
                     return
-
-                # Determine the winner's ID
-                winner_id = winner_participant['id']
 
                 # Check if the winner is either player 1 or player 2 of the match
                 if winner_id not in [match['player1_id'], match['player2_id']]:
