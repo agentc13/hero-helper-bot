@@ -1,5 +1,4 @@
 **CHALLONGE:**
-Show bracket graphic instead of match list.
 Use players challonge account for specific events instead of creating a nickname in Challonge.
 
 **TCL:**

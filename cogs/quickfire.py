@@ -63,15 +63,15 @@ class Quickfire(commands.Cog, name="quickfire"):
         :param context: The hybrid command context.
         :param tournament_name: Tournament name.
         """
+        # Get the list of all tournaments
         tournaments = challonge.tournaments.index(state='all')
+
+        # Find the tournament by its name
         tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
         if tournament is None:
-            # If the tournament does not exist, create it with the given name
-            new_tournament_name = tournament_name
-            tournament = challonge.tournaments.create(new_tournament_name)
-            embed = discord.Embed(title="Tournament Created",
-                                  description=f'Tournament "{new_tournament_name}" has been created!',
-                                  color=0x1f8b4c)
+            embed = discord.Embed(title='Error!',
+                                  description=f'Tournament "{tournament_name}" not found.',
+                                  color=0xe74c3c)
             await context.send(embed=embed)
         else:
             # If the tournament exists, check the number of participants
@@ -85,17 +85,18 @@ class Quickfire(commands.Cog, name="quickfire"):
                     # Start the tournament and create a new tournament with the same name
                     challonge.participants.randomize(tournament['id'])
                     challonge.tournaments.start(tournament['id'])
-                    new_tournament_name = f'{tournament_name} ({len(tournaments) + 1})'
+                    new_tournament_name = f'{tournament_name}{len(tournaments) + 1}'
                     unique_url = f"{tournament_name}{int(time.time())}"  # Add this line to create a unique URL
                     new_tournament = challonge.tournaments.create(new_tournament_name,
-                                                                  url=unique_url)  # Add url=unique_url parameter
+                                                                  url=unique_url,
+                                                                  game_name="Hero Realms Digital")  # Add url=unique_url parameter
                     embed = discord.Embed(title='Full Tournament',
                                           description=f'Tournament "{tournament_name}" has started! A new tournament "{new_tournament_name}" has been created.',
                                           color=0xe67e22)
                     await context.send(embed=embed)
             else:
                 embed = discord.Embed(title="Add Participant",
-                                      description=f"Please enter the name of the participant to add to tournament {tournament_name}",
+                                      description=f"Please enter your IGN (In Game Name) to be added to tournament {tournament_name}",
                                       color=0x1f8b4c)
                 await context.send(embed=embed)
                 participant_name = await self.bot.wait_for('message', check=lambda m: m.author == context.author)
@@ -104,10 +105,11 @@ class Quickfire(commands.Cog, name="quickfire"):
                 if num_participants == 16:
                     # Start the tournament and create a new tournament with the same name
                     challonge.tournaments.start(tournament['id'])
-                    new_tournament_name = f'{tournament_name} ({len(tournaments) + 1})'
+                    new_tournament_name = f'{tournament_name}{len(tournaments) + 1}'
                     unique_url = f"{tournament_name}{int(time.time())}"  # Add this line to create a unique URL
                     new_tournament = challonge.tournaments.create(new_tournament_name,
-                                                                  url=unique_url)  # Add url=unique_url parameter
+                                                                  url=unique_url,
+                                                                  game_name="Hero Realms Digital")  # Add url=unique_url parameter
                     embed = discord.Embed(title="Tournament Created",
                                           description=f'Tournament "{new_tournament_name}" has started! A new tournament "{new_tournament_name}" has been created.',
                                           color=0xc27c0e)
@@ -118,6 +120,9 @@ class Quickfire(commands.Cog, name="quickfire"):
                                           description=f'Participant "{participant["name"]}" has been added to tournament "{tournament_name}"',
                                           color=0x1f8b4c)
                     await context.send(embed=embed)
+                    # Gives user the Quickfire Role
+                    role = discord.utils.get(context.guild.roles, id=1104624377313624066)
+                    await context.author.add_roles(role)
 
     # Define the show_participants command, which allows a tournament organizer to view the list of participants in a tournament
     @qf.command(
@@ -389,7 +394,7 @@ class Quickfire(commands.Cog, name="quickfire"):
                         if tournament['state'] == 'complete':
                             # Find the winner in the list of participants
                             final_winner = next((p for p in participants if p["id"] == winner_id), None)
-
+                            role = discord.utils.get(context.guild.roles, id=1104624377313624066)
                             # Create an embed with the winner's information
                             embed = discord.Embed(
                                 title=f'Tournament "{tournament_name}" is complete!',
@@ -415,13 +420,15 @@ class Quickfire(commands.Cog, name="quickfire"):
         new_tournament_name = f'{name}'
         unique_url = f"{name}{int(time.time())}"  # Create a unique URL
         new_tournament = challonge.tournaments.create(new_tournament_name,
-                                                      url=unique_url)
-        await context.send(
-            f'Tournament "{new_tournament_name}" has started! A new tournament "{new_tournament_name}" has been created.')
+                                                      url=unique_url,
+                                                      game_name="Hero Realms Digital")
         embed = discord.Embed(title="Tournament Created",
-                              description=f"Name: {new_tournament_name}\nURL: {unique_url}",
+                              description=f"Name: {new_tournament_name}\nURL: {unique_url}\nGame: Hero Realms Digital",
                               color=0xc27c0e)
         await context.send(embed=embed)
+        role = discord.utils.get(context.guild.roles, id=1104624377313624066)
+        await context.send(
+            f'{role.mention} \nSign ups for  "{new_tournament_name}" are open! Use the "/qf signup {new_tournament_name}" command to join!')
 
     # Define the remove_tournament command, which allows a tournament organizer to delete a tournament
     @qf.command(
@@ -510,11 +517,33 @@ class Quickfire(commands.Cog, name="quickfire"):
                                   color=0xe74c3c)
             await context.send(embed=embed)
         else:
+            # If the tournament exists, check the number of participants
             participant = challonge.participants.create(tournament['id'], name)
             embed = discord.Embed(title="Participant Added",
                                   description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
                                   color=0x1f8b4c)
             await context.send(embed=embed)
+
+            # Check the number of participants
+            num_participants = len(challonge.participants.index(tournament['id']))
+            if num_participants >= 16:
+                embed = discord.Embed(title="Tournament Full",
+                                      description=f'The tournament "{tournament_name}" is full with {num_participants} participants',
+                                      color=0xa84300)
+                await context.send(embed=embed)
+                if num_participants == 16:
+                    # Start the tournament and create a new tournament with the same name
+                    challonge.participants.randomize(tournament['id'])
+                    challonge.tournaments.start(tournament['id'])
+                    new_tournament_name = f'{tournament_name}{len(tournaments) + 1}'
+                    unique_url = f"{tournament_name}{int(time.time())}"  # Add this line to create a unique URL
+                    new_tournament = challonge.tournaments.create(new_tournament_name,
+                                                                  url=unique_url,
+                                                                  game_name="Hero Realms Digital") # Add url=unique_url parameter
+                    embed = discord.Embed(title='Full Tournament',
+                                          description=f'Tournament "{tournament_name}" has started! A new tournament "{new_tournament_name}" has been created.',
+                                          color=0xe67e22)
+                    await context.send(embed=embed)
 
     @qf.command(
         name="finalize",
