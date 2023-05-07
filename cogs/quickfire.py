@@ -4,6 +4,12 @@ import time
 from discord.ext import commands
 from discord.ext.commands import Context
 from tabulate import tabulate
+import aiohttp
+import os
+import tempfile
+from io import BytesIO
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 
 from helpers import checks
 
@@ -182,6 +188,65 @@ class Quickfire(commands.Cog, name="quickfire"):
             embed.add_field(name='Player 2', value='\n'.join([b[2] for b in bracket]))
     
             await context.send(embed=embed)
+
+    @qf.command(
+        name="bracket",
+        description="Screenshots the tournament bracket from Challonge and posts the image.",
+    )
+    async def bracket(self, context: Context, tournament_name: str):
+        """
+        Display the tournament bracket image for the specified tournament by taking a screenshot.
+
+        :param context: The command context.
+        :param tournament_name: Tournament name.
+        """
+        tournaments = challonge.tournaments.index(state='all')
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
+
+        if tournament is None:
+            embed = discord.Embed(title='Error!',
+                                  description=f'Tournament "{tournament_name}" not found.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+        else:
+            # Get the tournament URL
+            tournament_url = tournament['live_image_url']
+
+            # Set up the headless browser
+            options = webdriver.ChromeOptions()
+            options.headless = True
+            options.add_argument("--disable-infobars")
+            options.add_argument("--disable-extensions")
+            options.add_argument("--disable-dev-shm-usage")
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-gpu")
+            driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+
+            try:
+                # Navigate to the tournament URL
+                driver.get(tournament_url)
+
+                # Take a screenshot of the bracket
+                screenshot = driver.get_screenshot_as_png()
+                driver.quit()
+
+                # Post the screenshot as an image
+                with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                    temp_file.write(screenshot)
+                    temp_file.flush()
+                    embed = discord.Embed(
+                        title=f'Tournament Bracket for "{tournament_name}"',
+                        color=0x71368a
+                    )
+                    await context.send(embed=embed, file=discord.File(temp_file.name, filename="bracket.png"))
+                    os.unlink(temp_file.name)
+
+            except Exception as e:
+                driver.quit()
+                embed = discord.Embed(title='Error!',
+                                      description='Failed to capture the bracket image.',
+                                      color=0xe74c3c)
+                await context.send(embed=embed)
 
     # Define the show_tournaments command, which lists all current tournaments and their status
     @qf.command(
@@ -418,6 +483,94 @@ class Quickfire(commands.Cog, name="quickfire"):
                                   description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
                                   color=0x1f8b4c)
             await context.send(embed=embed)
+
+    @qf.command(
+        name="finalize",
+        description="Manually finalizes a tournament.",
+    )
+    async def finalize(self, context: Context, tournament_name: str):
+        """
+        Finalize the specified tournament manually.
+
+        :param context: The command context.
+        :param tournament_name: Tournament name.
+        """
+        tournaments = challonge.tournaments.index(state='all')
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
+
+        if tournament is None:
+            embed = discord.Embed(title='Error!',
+                                  description=f'Tournament "{tournament_name}" not found.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+        else:
+            # Finalize the tournament
+            challonge.tournaments.finalize(tournament['id'])
+
+            # Refresh tournament data
+            tournament = challonge.tournaments.show(tournament['id'])
+
+            if tournament['state'] == 'complete':
+                # Get participants
+                participants = challonge.participants.index(tournament['id'])
+
+                # Find the winner in the list of participants
+                winner_id = tournament['winner_id']
+                winner_participant = next((p for p in participants if p["id"] == winner_id), None)
+
+                # Create an embed with the winner's information
+                embed = discord.Embed(
+                    title=f'Tournament "{tournament_name}" is complete!',
+                    description=f'Congratulations to the winner: {winner_participant["name"]}',
+                    color=0x71368a
+                )
+                await context.send(embed=embed)
+            else:
+                embed = discord.Embed(title='Error!',
+                                      description=f'Tournament "{tournament_name}" cannot be finalized.',
+                                      color=0xe74c3c)
+                await context.send(embed=embed)
+
+    @qf.command(
+        name="remove_player",
+        description="Removes a player from a tournament.",
+    )
+    async def remove_player(self, context: Context, tournament_name: str, player_name: str):
+        """
+        Remove a player from the specified tournament.
+
+        :param context: The command context.
+        :param tournament_name: Tournament name.
+        :param player_name: Name of the player to remove.
+        """
+        tournaments = challonge.tournaments.index(state='all')
+        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
+
+        if tournament is None:
+            embed = discord.Embed(title='Error!',
+                                  description=f'Tournament "{tournament_name}" not found.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+        else:
+            # Get participants
+            participants = challonge.participants.index(tournament['id'])
+
+            # Find the player in the list of participants
+            player_participant = next((p for p in participants if p["name"] == player_name), None)
+
+            if player_participant is None:
+                embed = discord.Embed(title='Error!',
+                                      description=f'Player "{player_name}" not found in the list of participants.',
+                                      color=0xe74c3c)
+                await context.send(embed=embed)
+            else:
+                # Remove the player from the tournament
+                challonge.participants.destroy(tournament['id'], player_participant['id'])
+                await context.send(f'Player "{player_name}" has been removed from tournament "{tournament_name}"')
+                embed = discord.Embed(title='Removed.',
+                                      description=f'Player "{player_name}" has been removed from {tournament_name}.',
+                                      color=0x71368a)
+                await context.send(embed=embed)
 
 
 # Define the setup function, which adds the Quickfire cog to the Hero-Helper Bot

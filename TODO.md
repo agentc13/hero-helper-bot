@@ -21,8 +21,7 @@ Division standings command (also shows current/outstanding matches) - participan
 Promote/demote automation (auto assigns division roles?) - TO
 
 **Quickfire:**
-Remove player command - TO
-Finalize tournament command - TO
+Randomize seeds - TO
 
 
 **SRDO:**
