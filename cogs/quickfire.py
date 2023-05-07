@@ -342,7 +342,6 @@ class Quickfire(commands.Cog, name="quickfire"):
             # Find the match which is the correct round and includes the winner id
             match = next((m for m in matches if m['round'] == round_number and (
                         m['player1_id'] == winner_id or m['player2_id'] == winner_id)), None)
-            print(match)
 
             # If the match is not found or already completed, send an error message
             if match is None:
