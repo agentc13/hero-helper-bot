@@ -1,12 +1,13 @@
 **CHALLONGE:**
 Use players challonge account for specific events instead of creating a nickname in Challonge.
+Fix bracket command to not be so janky.
 
 **TCL:**
 Create division command - TO
 Add players to division command - TO
-Start division command (begins RR in Challonge) - TO
+Start division command (begins Round Robin tournament in Challonge) - TO
 Weekly match announcement command (new and outstanding matches) - TO
-Report match score command - participants
+Report match score command - participants (THIS WILL NEED TO ENTER ACTUAL SCORE RESULTS!)
 Current/outstanding match command - participants
 Finalize tournament command for division (to end season) - TO
 Division announcement command - TO
@@ -15,14 +16,13 @@ Check in command - participants
 Automate weekly announcements - AC13
 Create start command for league season (combines start division for all divisions) - TO
 Finalize season command (combines finalize division for all divisions) - TO
-Import waitlist into division participants - TO
 Division standings command (also shows current/outstanding matches) - participants
 Promote/demote automation (auto assigns division roles?) - TO
 
 **Quickfire:**
 Add checks when signing up that name matches IGN
 Make signup, show_tournaments, show_matches, show_players, report just show QF info.
-
+Fix new tournament numbering when automatically creating a tournament.
 
 **SRDO:**
 Tournament signup command - participants
