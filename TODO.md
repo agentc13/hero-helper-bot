@@ -2,7 +2,7 @@
 Use players challonge account for specific events instead of creating a nickname in Challonge.
 Fix bracket command to not be so janky.
 
-**TCL:**
+**Thandar Combat League:**
 Create division command - TO
 Add players to division command - TO
 Start division command (begins Round Robin tournament in Challonge) - TO
@@ -40,8 +40,16 @@ Show Bracket command - participants
 Finalize SE tournament command - TO
 Winner announcement command - AC13
 
-
-
+**Highlander**
+Create tournament command - TO
+Signup command - participants
+Start tournament command - TO
+Finalize tournament command - TO
+Season Standings command - TO
+Add participants from challonge to DB - AC13
+Event/season points - AC13
+Top 4 invites - AC13
+Invitational stuff - AC13
 
 
 **Other stuff:**
