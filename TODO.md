@@ -3,13 +3,8 @@ Use players challonge account for specific events instead of creating a nickname
 Fix bracket command to not be so janky.
 
 **Thandar Combat League:**
-Create division command - TO
-Add players to division command - TO
-Remove player from division command - TO
-Start division command (begins Round Robin tournament in Challonge) - TO
 Finalize tournament command for division (to end season) - TO
 Weekly match announcement command (new and outstanding matches) - TO
-Signup command - participants
 Report match score command - participants (THIS WILL NEED TO ENTER ACTUAL SCORE RESULTS!)
 Division standings command (also shows current/outstanding matches) - participants
 Automate weekly announcements - AC13
@@ -20,7 +15,7 @@ Promote/demote automation (auto assigns division roles?) - TO
 **Quickfire:**
 Add checks when signing up that name matches IGN
 Make signup, show_tournaments, show_matches, show_players, report just show QF info.
-Fix new tournament numbering when automatically creating a tournament.
+Fix new tournament numbering when automatically creating a tournament. 
 
 **SRDO:**
 Tournament signup command - participants

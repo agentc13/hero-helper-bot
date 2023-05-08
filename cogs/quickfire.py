@@ -125,7 +125,7 @@ class Quickfire(commands.Cog, name="quickfire"):
     # Define the show_participants command, which allows a tournament organizer to view the list of participants in a tournament
     @qf.command(
         name="show_players",
-        description="Allows TO to add player to tournament",
+        description="Lists participants in a specific Quickfire tournament.",
     )
     async def show_players(self, context: Context, tournament_name: str):
         """

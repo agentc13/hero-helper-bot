@@ -1,5 +1,7 @@
 import discord
-from discord import app_commands
+import challonge
+import time
+from tabulate import tabulate
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -29,13 +31,14 @@ class Tcl(commands.Cog, name="tcl"):
                             "`report` - Report match results.\n"
                             "`standings` - Posts the current division standings.\n\n"
                             "**Tournament Organizer Only**\n"
+                            "`remove_waitlist` - Removes a player from the Thandar Combat League waitlist.\n"
                             "`create_division` - Creates a new Thandar Combat League division.\n"
                             "`add` - Add a user to a Thandar Combat League division.\n"
                             "`remove` - Remove a user from Thandar Combat League division.\n"
                             "`show` - Lists players in a Thandar Combat League division.\n"
                             "`matches` - Posts matches for the week, and lists unreported matches from previous weeks.\n"
-                            "`start` - Starts a Thandar Combat League division for the season.\n"
-                            "`finalize` - Finalizes a Thandar Combat League division for the season.",
+                            "`start_division` - Starts a Thandar Combat League division for the season.\n"
+                            "`end_division` - Finalizes a Thandar Combat League division for the season.",
                 color=0x992d22,
             )
             await context.send(embed=embed)
@@ -106,31 +109,30 @@ class Tcl(commands.Cog, name="tcl"):
         """
         pass
 
+    # Start Tournament Organizer specific commands.
     @tcl.command(
         base="tcl",
-        name="add",
-        description="Sign up for Thandar Combat League.",
+        name="remove_waitlist",
+        description="Removes a player from the Thandar Combat League waitlist.",
     )
     @commands.has_role("Tournament Organizer")
-    async def add(self, context: Context, user: discord.User, hr_ign: str):
+    async def remove_waitlist(self, context: Context, user: discord.User):
         """
-        Sign up for Thandar Combat League.
+        Removes a player from the Thandar Combat League waitlist.
 
         :param context: The hybrid command context.
-        :param user: The user that should be added to Thandar Combat League.
-        :param hr_ign: The Hero Realms In Game Name for the user to be added to Thandar Combat League.
+        :param user: The user that should be removed from the waitlist.
         """
         user_id = user.id
-        if await db_manager.is_signed_up(user_id):
+        if not await db_manager.is_signed_up(user_id):
             embed = discord.Embed(
-                description=f"**{user.name}** is already on the waitlist.",
-                color=0x992d22,
+                description=f"**{user.name}** is not on the waitlist.", color=0x992d22
             )
             await context.send(embed=embed)
             return
-        total = await db_manager.add_user_to_waitlist(user_id, hr_ign)
+        total = await db_manager.remove_user_from_waitlist(user_id)
         embed = discord.Embed(
-            description=f"**{user.name}** has been successfully added to the waitlist",
+            description=f"**{user.name}** has been successfully removed from the waitlist.",
             color=0x992d22,
         )
         embed.set_footer(
@@ -139,14 +141,90 @@ class Tcl(commands.Cog, name="tcl"):
         await context.send(embed=embed)
 
     @tcl.command(
+        name="create_division",
+        description="Creates a new Thandar Combat League division.",
+    )
+    @commands.has_role("Tournament Organizer")
+    async def create_division(self, context: Context, name: str):
+        """
+        Creates a new Thandar Combat League division.
+
+        :param context: The hybrid command context.
+        :param name: Name of division.
+        """
+        new_tournament_name = f'{name}'
+        unique_url = f"{name}{int(time.time())}".replace(" ", "")  # Create a unique URL
+        new_tournament = challonge.tournaments.create(new_tournament_name,
+                                                      url=unique_url,
+                                                      tournament_type="round robin",
+                                                      game_name="Hero Realms Digital",
+                                                      ranked_by="points scored",
+                                                      tie_breaks=["match wins", "game win percentage", "points scored"]
+                                                      )
+        embed = discord.Embed(title="Tournament Created",
+                              description=f"Name: {new_tournament_name}\nURL: {unique_url}\nGame: Hero Realms Digital",
+                              color=0xc27c0e)
+        await context.send(embed=embed)
+
+    @tcl.command(
+        base="tcl",
+        name="add",
+        description="Adds player to Thandar Combat League division.",
+    )
+    @commands.has_role("Tournament Organizer")
+    async def add(self, context: Context, division_name: str, hr_ign: str):
+        """
+        Adds player to Thandar Combat League division.
+
+        :param context: The hybrid command context.
+        :param division_name: The Thandar Combat League division that the user should be added to.
+        :param hr_ign: The Hero Realms In Game Name for the user to be added to Thandar Combat League.
+        """
+        # Get the list of all tournaments
+        tournaments = challonge.tournaments.index(state='all')
+
+        # Find the tournament by its name
+        tournament = next((t for t in tournaments if t['name'] == division_name), None)
+
+        if tournament is None:
+            embed = discord.Embed(title='Error!',
+                                  description=f'Tournament "{division_name}" not found.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+        else:
+            # If the tournament exists, add the participant.
+            participant = challonge.participants.create(tournament['id'], hr_ign)
+            embed = discord.Embed(title="Participant Added",
+                                  description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
+                                  color=0x1f8b4c)
+            await context.send(embed=embed)
+        # user_id = user.id
+        # if await db_manager.is_signed_up(user_id):
+        #     embed = discord.Embed(
+        #         description=f"**{user.name}** is already on the waitlist.",
+        #         color=0x992d22,
+        #     )
+        #     await context.send(embed=embed)
+        #     return
+        # total = await db_manager.add_user_to_waitlist(user_id, hr_ign)
+        # embed = discord.Embed(
+        #     description=f"**{user.name}** has been successfully added to the waitlist",
+        #     color=0x992d22,
+        # )
+        # embed.set_footer(
+        #     text=f"There {'is' if total == 1 else 'are'} now {total} {'user' if total == 1 else 'users'} on the waitlist."
+        # )
+        # await context.send(embed=embed)
+
+    @tcl.command(
         base="tcl",
         name="remove",
-        description="Lets you remove a user from the waitlist.",
+        description="Removes a player from a Thandar Combat League waitlist.",
     )
     @commands.has_role("Tournament Organizer")
     async def remove(self, context: Context, user: discord.User):
         """
-        Lets you remove a user from the waitlist.
+        Removes a player from the Thandar Combat League waitlist.
 
         :param context: The hybrid command context.
         :param user: The user that should be removed from the waitlist.
@@ -174,29 +252,28 @@ class Tcl(commands.Cog, name="tcl"):
         description="Lists the players in a Thandar Combat League division.",
     )
     @commands.has_role("Tournament Organizer")
-    async def show(self, context: Context):
+    async def show(self, context: Context, division_name: str):
         """
         Allows user to report a Thandar Combat League match result.
 
         :param context: The hybrid command context.
+        :param division_name: Name of the Thandar Combat League Division.
         """
-        waitlist = await db_manager.get_waitlist()
-        if len(waitlist) == 0:
-            embed = discord.Embed(
-                description="There are currently no Thandar Combat League users.", color=0x992d22
-            )
+        tournaments = challonge.tournaments.index(state='all')
+        tournament = next((t for t in tournaments if t['name'] == division_name), None)
+        if tournament is None:
+            embed = discord.Embed(title='Error!',
+                                  description=f'Division "{division_name}" not found.',
+                                  color=0xe74c3c)
             await context.send(embed=embed)
-            return
-
-        embed = discord.Embed(title="Thandar Combat League Users", color=0x992d22)
-        users = []
-        for participant in waitlist:
-            user = self.bot.get_user(int(participant[0])) or await self.bot.fetch_user(
-                int(participant[0])
-            )
-            users.append(f"• {user.mention}  IGN: {participant[1]} - Signed Up <t:{participant[2]}>")
-        embed.description = "\n".join(users)
-        await context.send(embed=embed)
+        else:
+            participants = challonge.participants.index(tournament['id'])
+            participant_names = [p['name'] for p in participants]
+            participant_list = '\n'.join(participant_names)
+            embed = discord.Embed(title=f'Participants in division "{division_name}"',
+                                  description=participant_list,
+                                  color=0x992d22)
+            await context.send(embed=embed)
 
     @tcl.command(
         base="tcl",
@@ -204,41 +281,101 @@ class Tcl(commands.Cog, name="tcl"):
         description="Display the weeks' matches for a Thandar Combat League division.",
     )
     @commands.has_role("Tournament Organizer")
-    async def matches(self, context: Context):
+    async def matches(self, context: Context, division_name: str):
         """
         Display the weeks' matches for a Thandar Combat League division.
 
         :param context: The hybrid command context.
+        :param division_name: Name of tournament whose matches will be returned.
         """
-        pass
+        tournaments = challonge.tournaments.index(state='all')
+        tournament = next((t for t in tournaments if t['name'] == division_name), None)
+        if tournament is None:
+            embed = discord.Embed(title='Error!',
+                                  description=f'Division "{division_name}" not found.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+        else:
+            matches = challonge.matches.index(tournament['id'], state='all')
+            participants = challonge.participants.index(tournament['id'])
+            participant_ids = {p['id']: p for p in participants}
+            bracket = []
+            for match in matches:
+                if match['player1_id'] is not None and match['player2_id'] is not None:
+                    p1_name = participant_ids[match['player1_id']]['name']
+                    p2_name = participant_ids[match['player2_id']]['name']
+                else:
+                    p1_name = "TBD"
+                    p2_name = "TBD"
+                round_num = match.get('round', 'N/A')
+                bracket.append((match['id'], p1_name, p2_name, round_num))
+            bracket_str = tabulate(bracket, headers=["Match ID", "Player 1", "Player 2", "Round"])
 
+            embed = discord.Embed(title=division_name, description='Division Matches', color=0x206694)
+            embed.add_field(name='Week', value='\n'.join([str(b[3]) for b in bracket]))
+            embed.add_field(name='Player 1', value='\n'.join([b[1] for b in bracket]))
+            embed.add_field(name='Player 2', value='\n'.join([b[2] for b in bracket]))
+
+            await context.send(embed=embed)
+
+    # Define the start_division command, which allows a tournament organizer to start a round robin tournament for a division.
     @tcl.command(
-        base="tcl",
-        name="start",
-        description="Starts the season for a Thandar Combat League division.",
+        name="start_division",
+        description="Allows TO to start division",
     )
     @commands.has_role("Tournament Organizer")
-    async def start(self, context: Context):
+    async def start_division(self, context: Context, division_name: str):
         """
-        Starts the season for a Thandar Combat League division.
+        Allows a Tournament Organizer to start a tournament in Challonge.
 
         :param context: The hybrid command context.
+        :param division_name: Name of the division.
         """
-        pass
+        # Get the list of all tournaments
+        tournaments = challonge.tournaments.index(state='all')
+
+        # Find the tournament by its name
+        tournament = next((t for t in tournaments if t['name'] == division_name), None)
+
+        if tournament is None:
+            embed = discord.Embed(title='Error!',
+                                  description=f'Division "{division_name}" not found.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+        else:
+            # Randomize seeds before starting the tournament
+            challonge.participants.randomize(tournament['id'])
+
+            challonge.tournaments.start(tournament['id'])
+            embed = discord.Embed(title="Division Started",
+                                  description=f'Thandar Combat League {tournament["name"]} has started!',
+                                  color=0x206694)
+            await context.send(embed=embed)
 
     @tcl.command(
         base="tcl",
-        name="end",
+        name="end_division",
         description="Finalizes the season for a Thandar Combat League division.",
     )
     @commands.has_role("Tournament Organizer")
-    async def end(self, context: Context):
+    async def end_division(self, context: Context, division_name: str):
         """
         Finalizes the season for a Thandar Combat League division.
 
         :param context: The hybrid command context.
+        :param division_name: The name of the division.
         """
-        pass
+        tournaments = challonge.tournaments.index(state='all')
+        tournament = next((t for t in tournaments if t['name'] == division_name), None)
+
+        if tournament is None:
+            embed = discord.Embed(title='Error!',
+                                  description=f'TDivision "{division_name}" not found.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+        else:
+            # Finalize the tournament
+            challonge.tournaments.finalize(tournament['id'])
 
 
 async def setup(bot):
