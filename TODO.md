@@ -5,18 +5,16 @@ Fix bracket command to not be so janky.
 **Thandar Combat League:**
 Create division command - TO
 Add players to division command - TO
+Remove player from division command - TO
 Start division command (begins Round Robin tournament in Challonge) - TO
-Weekly match announcement command (new and outstanding matches) - TO
-Report match score command - participants (THIS WILL NEED TO ENTER ACTUAL SCORE RESULTS!)
-Current/outstanding match command - participants
 Finalize tournament command for division (to end season) - TO
-Division announcement command - TO
+Weekly match announcement command (new and outstanding matches) - TO
 Signup command - participants
-Check in command - participants
+Report match score command - participants (THIS WILL NEED TO ENTER ACTUAL SCORE RESULTS!)
+Division standings command (also shows current/outstanding matches) - participants
 Automate weekly announcements - AC13
 Create start command for league season (combines start division for all divisions) - TO
 Finalize season command (combines finalize division for all divisions) - TO
-Division standings command (also shows current/outstanding matches) - participants
 Promote/demote automation (auto assigns division roles?) - TO
 
 **Quickfire:**
