@@ -8,3 +8,6 @@ pm2 logs HeroHelperBot
 
 Stop Bot:
 pm2 stop HeroHelperBot
+
+Get current status:
+pm2 status
