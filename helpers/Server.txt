@@ -1,0 +1,10 @@
+To run bot on VPS with node.js, npm, and pm2:
+
+Start command:
+pm2 start bot.py --name=HeroHelperBot --interpreter=python3
+
+Check logs:
+pm2 logs HeroHelperBot
+
+Stop Bot:
+pm2 stop HeroHelperBot
