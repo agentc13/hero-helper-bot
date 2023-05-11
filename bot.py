@@ -25,7 +25,6 @@ intents.message_content = True
 intents.members = True
 
 # sets bot command prefix and loads intents for bot
-# noinspection PyTypeChecker
 bot = Bot(
     command_prefix=commands.when_mentioned_or(config["prefix"]),
     intents=intents,
@@ -251,7 +250,7 @@ async def on_command_error(context: Context, error) -> None:
         raise error
 
 
-async def load_cogs() -> None:
+async def load_cogs():
     """
     The code in this function is executed whenever the bot will start.
     """

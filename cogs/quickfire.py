@@ -8,7 +8,7 @@ import os
 import tempfile
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
-from helpers import checks
+
 
 
 # Define the Quickfire class, which is a subclass of commands.Cog
@@ -54,7 +54,6 @@ class Quickfire(commands.Cog, name="quickfire"):
         name="signup",
         description="Allows user to sign up for the current Quickfire tournament",
     )
-    @checks.is_quickfire()
     async def signup(self, context: Context, tournament_name: str):
         """
         Allows user to sign up for the current Quickfire tournament.
@@ -62,6 +61,14 @@ class Quickfire(commands.Cog, name="quickfire"):
         :param context: The hybrid command context.
         :param tournament_name: Tournament name.
         """
+        # check if the tournament_name includes 'quickfire'
+        if 'quickfire' not in tournament_name:
+            embed = discord.Embed(title='Error!',
+                                  description=f'This command only works for Quickfire tournaments.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+            return
+
         # Get the list of all pending tournaments
         tournaments = challonge.tournaments.index(state='pending')
 
@@ -110,7 +117,6 @@ class Quickfire(commands.Cog, name="quickfire"):
         name="show_players",
         description="Lists participants in a specific Quickfire tournament.",
     )
-    @checks.is_quickfire()
     async def show_players(self, context: Context, tournament_name: str):
         """
         Lists participants in a specific Quickfire tournament.
@@ -118,6 +124,14 @@ class Quickfire(commands.Cog, name="quickfire"):
         :param context: The hybrid command context.
         :param tournament_name: Tournament name.
         """
+        # check if the tournament_name includes 'quickfire'
+        if 'quickfire' not in tournament_name:
+            embed = discord.Embed(title='Error!',
+                                  description=f'This command only works for Quickfire tournaments.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+            return
+
         tournaments = challonge.tournaments.index(state='all')
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
         if tournament is None:
@@ -139,7 +153,6 @@ class Quickfire(commands.Cog, name="quickfire"):
         name="show_matches",
         description="Returns a list of matches for a specific Quickfire tournament.",
     )
-    @checks.is_quickfire()
     async def show_matches(self, context: Context, tournament_name: str):
         """
         Returns a list of open matches for a specific Quickfire tournament.
@@ -147,6 +160,14 @@ class Quickfire(commands.Cog, name="quickfire"):
         :param context: The hybrid command context.
         :param tournament_name: Name of tournament whose matches will be returned.
         """
+        # check if the tournament_name includes 'quickfire'
+        if 'quickfire' not in tournament_name:
+            embed = discord.Embed(title='Error!',
+                                  description=f'This command only works for Quickfire tournaments.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+            return
+
         tournaments = challonge.tournaments.index(state='in progress')
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
         if tournament is None:
@@ -181,7 +202,6 @@ class Quickfire(commands.Cog, name="quickfire"):
         name="bracket_link",
         description="Displays the tournament bracket from Challonge.",
     )
-    @checks.is_quickfire()
     async def bracket_link(self, context: Context, tournament_name: str):
         """
         Returns the Challonge bracket link for the specified tournament (if in progress).
@@ -189,6 +209,13 @@ class Quickfire(commands.Cog, name="quickfire"):
         :param context: The command context.
         :param tournament_name: Tournament name.
         """
+        # check if the tournament_name includes 'quickfire'
+        if 'quickfire' not in tournament_name:
+            embed = discord.Embed(title='Error!',
+                                  description=f'This command only works for Quickfire tournaments.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+            return
 
         tournaments = challonge.tournaments.index(state='in progress')
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
@@ -211,7 +238,6 @@ class Quickfire(commands.Cog, name="quickfire"):
         name="bracket",
         description="Screenshots the tournament bracket from Challonge and posts the image.",
     )
-    @checks.is_quickfire()
     async def bracket(self, context: Context, tournament_name: str):
         """
         Displays the Challonge bracket image for the specified in progress tournament by taking a screenshot.
@@ -220,6 +246,14 @@ class Quickfire(commands.Cog, name="quickfire"):
         :param context: The command context.
         :param tournament_name: Tournament name.
         """
+        # check if the tournament_name includes 'quickfire'
+        if 'quickfire' not in tournament_name:
+            embed = discord.Embed(title='Error!',
+                                  description=f'This command only works for Quickfire tournaments.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+            return
+
         tournaments = challonge.tournaments.index(state='in progress')
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
 
@@ -295,7 +329,6 @@ class Quickfire(commands.Cog, name="quickfire"):
         name="report",
         description="Allows user to report a Quickfire match result.",
     )
-    @checks.is_quickfire()
     async def report(self, context: Context, tournament_name: str, round_number: int, winner: str):
         """
         Report the result of a match in the specified Quickfire tournament using the round number.
@@ -305,6 +338,14 @@ class Quickfire(commands.Cog, name="quickfire"):
         :param round_number: Round number of the match.
         :param winner: Name of the winner.
         """
+        # check if the tournament_name includes 'quickfire'
+        if 'quickfire' not in tournament_name:
+            embed = discord.Embed(title='Error!',
+                                  description=f'This command only works for Quickfire tournaments.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+            return
+
         # Fetch all in progress tournaments and find the one with the specified name
         tournaments = challonge.tournaments.index(state='in progress')
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
@@ -401,7 +442,6 @@ class Quickfire(commands.Cog, name="quickfire"):
         description="Allows TO to manually add a player to a Quickfire tournament",
     )
     @commands.has_role("Tournament Organizer")
-    @checks.is_quickfire()
     async def add_player(self, context: Context, tournament_name: str, player_name: str):
         """
         Add player to tournament.
@@ -410,6 +450,14 @@ class Quickfire(commands.Cog, name="quickfire"):
         :param tournament_name: Name of the tournament.
         :param player_name: Name of player to add.
         """
+        # check if the tournament_name includes 'quickfire'
+        if 'quickfire' not in tournament_name:
+            embed = discord.Embed(title='Error!',
+                                  description=f'This command only works for Quickfire tournaments.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+            return
+
         # Get the list of all pending tournaments
         tournaments = challonge.tournaments.index(state='pending')
 

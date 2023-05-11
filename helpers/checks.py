@@ -21,20 +21,3 @@ def is_owner():
         return True
 
     return commands.check(predicate)
-
-
-def is_quickfire():
-    def decorator(func):
-        @wraps(func)
-        async def wrapper(context, *args, **kwargs):
-            tournament_name = args[0]  # assuming tournament_name is the first argument
-            if 'quickfire' not in tournament_name:
-                embed = discord.Embed(title='Error!',
-                                      description=f'This command only works for Quickfire tournaments.',
-                                      color=0xe74c3c)
-                await context.send(embed=embed)
-                return
-            return await func(context, *args, **kwargs)
-        return wrapper
-    return decorator
-d
