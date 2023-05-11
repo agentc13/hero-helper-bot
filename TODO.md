@@ -3,19 +3,17 @@ Use players challonge account for specific events instead of creating a nickname
 Fix bracket command to not be so janky.
 
 **Thandar Combat League:**
-Finalize tournament command for division (to end season) - TO
-Weekly match announcement command (new and outstanding matches) - TO
 Report match score command - participants (THIS WILL NEED TO ENTER ACTUAL SCORE RESULTS!)
+Fix weekly match announcement command (to only show the new round and outstanding matches) - TO
+Fix remove_waitlist command-TO
 Division standings command (also shows current/outstanding matches) - participants
-Automate weekly announcements - AC13
 Create start command for league season (combines start division for all divisions) - TO
 Finalize season command (combines finalize division for all divisions) - TO
-Promote/demote automation (auto assigns division roles?) - TO
+Automate weekly announcements - AC13
+Promote/demote automation (auto assigns division roles?) - AC13
 
 **Quickfire:**
 Add checks when signing up that name matches IGN
-Make signup, show_tournaments, show_matches, show_players, report just show QF info.
-Fix new tournament numbering when automatically creating a tournament. 
 
 **SRDO:**
 Tournament signup command - participants
@@ -44,6 +42,8 @@ Event/season points - AC13
 Top 4 invites - AC13
 Invitational stuff - AC13
 
+**Tournament Organizer**
+Add automation
 
 **Other stuff:**
 Add more roles for role checks.
@@ -51,5 +51,4 @@ Add meme commands. (ala carl-bot)
 Alt-art commands. (ala carl-bot)
 Card lookup commands. (host image on server instead of web-scraping? Have cards for each class and add stuff from beta).
 Command to add cards to lookup database.
-TO Helper (allow organizers to set up league/tournament through discord with various formats).
 Allow admins/mods to add simple commands to add to memes/alt art card commands. (ala carl-bot)

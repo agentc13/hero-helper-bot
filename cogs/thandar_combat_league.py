@@ -5,7 +5,7 @@ from tabulate import tabulate
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from helpers import checks, db_manager
+from helpers import db_manager
 
 
 class Tcl(commands.Cog, name="tcl"):
@@ -16,7 +16,6 @@ class Tcl(commands.Cog, name="tcl"):
         name="tcl",
         description="Command group for Thandar Combat League.",
     )
-    @checks.is_owner()
     async def tcl(self, context: Context):
         """
         Command group for Thandar Combat League.
@@ -35,7 +34,7 @@ class Tcl(commands.Cog, name="tcl"):
                             "`create_division` - Creates a new Thandar Combat League division.\n"
                             "`add` - Add a user to a Thandar Combat League division.\n"
                             "`remove` - Remove a user from Thandar Combat League division.\n"
-                            "`show` - Lists players in a Thandar Combat League division.\n"
+                            "`show_division` - Lists players in a Thandar Combat League division.\n"
                             "`matches` - Posts matches for the week, and lists unreported matches from previous weeks.\n"
                             "`start_division` - Starts a Thandar Combat League division for the season.\n"
                             "`end_division` - Finalizes a Thandar Combat League division for the season.",
@@ -166,6 +165,7 @@ class Tcl(commands.Cog, name="tcl"):
                               color=0xc27c0e)
         await context.send(embed=embed)
 
+    # Tournament Organizer command to add players into a specified division.
     @tcl.command(
         base="tcl",
         name="add",
@@ -198,23 +198,6 @@ class Tcl(commands.Cog, name="tcl"):
                                   description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
                                   color=0x1f8b4c)
             await context.send(embed=embed)
-        # user_id = user.id
-        # if await db_manager.is_signed_up(user_id):
-        #     embed = discord.Embed(
-        #         description=f"**{user.name}** is already on the waitlist.",
-        #         color=0x992d22,
-        #     )
-        #     await context.send(embed=embed)
-        #     return
-        # total = await db_manager.add_user_to_waitlist(user_id, hr_ign)
-        # embed = discord.Embed(
-        #     description=f"**{user.name}** has been successfully added to the waitlist",
-        #     color=0x992d22,
-        # )
-        # embed.set_footer(
-        #     text=f"There {'is' if total == 1 else 'are'} now {total} {'user' if total == 1 else 'users'} on the waitlist."
-        # )
-        # await context.send(embed=embed)
 
     @tcl.command(
         base="tcl",
@@ -248,11 +231,11 @@ class Tcl(commands.Cog, name="tcl"):
 
     @tcl.command(
         base="tcl",
-        name="show",
+        name="show_division",
         description="Lists the players in a Thandar Combat League division.",
     )
     @commands.has_role("Tournament Organizer")
-    async def show(self, context: Context, division_name: str):
+    async def show_division(self, context: Context, division_name: str):
         """
         Allows user to report a Thandar Combat League match result.
 
@@ -277,6 +260,27 @@ class Tcl(commands.Cog, name="tcl"):
 
     @tcl.command(
         base="tcl",
+        name="show_waitlist",
+        description="Lists the players in a Thandar Combat League division.",
+    )
+    @commands.has_role("Tournament Organizer")
+    async def show_waitlist(self, context: Context):
+        """
+        Allows user to report a Thandar Combat League match result.
+
+        :param context: The hybrid command context.
+        """
+        # Get waitlist from db.
+        participants = await db_manager.get_waitlist()
+        participant_names = [p[1] for p in participants]
+        participant_list = '\n'.join(participant_names)
+        embed = discord.Embed(title=f'Players signed up for Thandar Combat League',
+                              description=participant_list,
+                              color=0x992d22)
+        await context.send(embed=embed)
+
+    @tcl.command(
+        base="tcl",
         name="matches",
         description="Display the weeks' matches for a Thandar Combat League division.",
     )
@@ -289,7 +293,7 @@ class Tcl(commands.Cog, name="tcl"):
         :param division_name: Name of tournament whose matches will be returned.
         """
         tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['name'] == division_name), None)
+        tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
         if tournament is None:
             embed = discord.Embed(title='Error!',
                                   description=f'Division "{division_name}" not found.',
@@ -335,7 +339,7 @@ class Tcl(commands.Cog, name="tcl"):
         tournaments = challonge.tournaments.index(state='all')
 
         # Find the tournament by its name
-        tournament = next((t for t in tournaments if t['name'] == division_name), None)
+        tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
 
         if tournament is None:
             embed = discord.Embed(title='Error!',
@@ -366,7 +370,7 @@ class Tcl(commands.Cog, name="tcl"):
         :param division_name: The name of the division.
         """
         tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['name'] == division_name), None)
+        tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
 
         if tournament is None:
             embed = discord.Embed(title='Error!',

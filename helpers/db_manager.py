@@ -5,7 +5,6 @@ import aiosqlite
 DATABASE_PATH = f"{os.path.realpath(os.path.dirname(__file__))}/../database/database.db"
 
 
-# Adding TCL db
 async def get_waitlist() -> list:
     """
     This function will return the list of all users on waitlist.
