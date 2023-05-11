@@ -10,7 +10,6 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 
 
-
 # Define the Quickfire class, which is a subclass of commands.Cog
 class Quickfire(commands.Cog, name="quickfire"):
     def __init__(self, bot):
@@ -313,12 +312,12 @@ class Quickfire(commands.Cog, name="quickfire"):
 
         :param context: The hybrid command context.
         """
-        tournaments = challonge.tournaments.index(state='in_progress,pending')
+        tournaments = challonge.tournaments.index(state='all')
         embed = discord.Embed(title='Quickfire Tournament List',
                               description='All currently in progress or pending Quickfire tournaments.',
                               color=0xa84300)
         for tournament in tournaments:
-            if 'quickfire' in tournament['name'].lower():
+            if 'quickfire' in tournament['name'].lower() and tournament['state'] != 'complete':
                 embed.add_field(name=tournament['name'],
                                 value=f"Status: {tournament['state']}",
                                 inline=False)
@@ -346,6 +345,9 @@ class Quickfire(commands.Cog, name="quickfire"):
             await context.send(embed=embed)
             return
 
+        # Fetch the quickfire role
+        announcement_role = discord.utils.get(context.guild.roles, name="quickfire")
+
         # Fetch all in progress tournaments and find the one with the specified name
         tournaments = challonge.tournaments.index(state='in progress')
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
@@ -364,8 +366,14 @@ class Quickfire(commands.Cog, name="quickfire"):
             # Get participants of the tournament
             participants = challonge.participants.index(tournament['id'])
 
+            # Store the original winner name
+            original_winner_name = winner
+
+            # Convert winner to lower case
+            winner = winner.lower()
+
             # Find the winner in the list of participants
-            winner_participant = next((p for p in participants if p["name"] == winner), None)
+            winner_participant = next((p for p in participants if p["name"].lower() == winner), None)
 
             # Determine the winner's ID
             winner_id = winner_participant['id']
@@ -411,7 +419,7 @@ class Quickfire(commands.Cog, name="quickfire"):
                     )
                     embed = discord.Embed(
                         title='Match Reported',
-                        description=f'Match result reported for match in round {round_number} in tournament "{tournament_name} {winner} won 1-0',
+                        description=f'Match result reported for match in round {round_number} in tournament "{tournament_name}. {original_winner_name} won 1-0',
                         color=0x71368a
                     )
                     await context.send(embed=embed)
@@ -427,11 +435,11 @@ class Quickfire(commands.Cog, name="quickfire"):
                         if tournament['state'] == 'complete':
                             # Find the winner in the list of participants
                             final_winner = next((p for p in participants if p["id"] == winner_id), None)
-                            role = discord.utils.get(context.guild.roles, id=1104624377313624066)
+
                             # Create an embed with the winner's information
                             embed = discord.Embed(
                                 title=f'Tournament "{tournament_name}" is complete!',
-                                description=f'Congratulations to the winner: {final_winner["name"]}',
+                                description=f'Congratulations to the winner: {original_winner_name}\n\n{announcement_role.mention}, please take note.',
                                 color=0x1f8b4c
                             )
                             await context.send(embed=embed)
@@ -470,25 +478,35 @@ class Quickfire(commands.Cog, name="quickfire"):
                                   color=0xe74c3c)
             await context.send(embed=embed)
         else:
-            # If the tournament exists, check the number of participants
-            participant = challonge.participants.create(tournament['id'], player_name)
-            embed = discord.Embed(title="Participant Added",
-                                  description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
-                                  color=0x1f8b4c)
-            await context.send(embed=embed)
-
             # Check the number of participants
             num_participants = len(challonge.participants.index(tournament['id']))
-            if num_participants >= 16:
+            if num_participants < 16:
+                # If the tournament exists, add player to tournament.
+                participant = challonge.participants.create(tournament['id'], player_name)
+                embed = discord.Embed(title="Participant Added",
+                                      description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
+                                      color=0x1f8b4c)
+                await context.send(embed=embed)
+            else:
                 embed = discord.Embed(title="Tournament Full",
                                       description=f'The tournament "{tournament_name}" is full with {num_participants} participants',
                                       color=0xa84300)
                 await context.send(embed=embed)
+
+            # Check the number of participants to see if we are at 16 after adding the player.
+            num_participants = len(challonge.participants.index(tournament['id']))
             if num_participants == 16:
-                # Start the tournament and create a new tournament with the same name
+                # Start the tournament and create a new tournament with the same name but new number at the end.
                 challonge.participants.randomize(tournament['id'])
                 challonge.tournaments.start(tournament['id'])
-                new_tournament_name = f'{tournament_name}{len(tournaments) + 1}'
+
+                # Extract old tournament number and increment it by 1 for the new tournament
+                old_number = int(''.join(filter(str.isdigit, tournament_name)))
+                new_number = old_number + 1
+
+                # Replace the old number in the tournament_name with the new number
+                new_tournament_name = tournament_name.replace(str(old_number), str(new_number))
+
                 unique_url = f"{tournament_name}{int(time.time())}"  # Add this line to create a unique URL
                 new_tournament = challonge.tournaments.create(new_tournament_name,
                                                               url=unique_url,

@@ -1,6 +1,7 @@
 import challonge
 import discord
 import time
+import re
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -19,7 +20,7 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
         name="to",
         description="Command group for Tournament Organizers.",
     )
-    async def to(self, context: Context) -> None:
+    async def to(self, context: Context):
         """
         Command group for Tournament Organizers.
 
@@ -43,17 +44,38 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
         description="Allows a Tournament Organizer to create a new tournament in Challonge.",
     )
     @commands.has_role("Tournament Organizer")
-    async def create_tournament(self, context: Context, name: str, group: str, tournament_type: str):
+    async def create_tournament(self, context: Context, tournament_name: str, group: str, tournament_type: str):
         """
         Allows a Tournament Organizer to create a new tournament in Challonge.
 
         :param context: The hybrid command context.
-        :param name: Name of tournament.
-        :param group: The command group for the type of tournament being created.
+        :param tournament_name: Name of tournament.
+        :param group: The command group for the type of tournament being created (qf, tcl, hl, srdo, hrpc).
         :param tournament_type: Type of tournament being created (single elimination, round robin, swiss, double elimination).
         """
-        new_tournament_name = f'{name}'
-        unique_url = f"{name}{int(time.time())}".replace(" ", "")  # Create a unique URL
+        # lookup announcement role from the group argument.
+        announcement_role = discord.utils.get(context.guild.roles, name="Here")
+        if group.lower() == "qf":
+            # Fetch the quickfire role
+            announcement_role = discord.utils.get(context.guild.roles, name="Quickfire")
+        elif group.lower() == "tcl":
+            # Fetch the quickfire role
+            announcement_role = discord.utils.get(context.guild.roles, name="Thandar Combat League")
+        elif group.lower() == "hl":
+            # Fetch the quickfire role
+            announcement_role = discord.utils.get(context.guild.roles, name="Highlander")
+        elif group.lower() == "srdo":
+            # Fetch the quickfire role
+            announcement_role = discord.utils.get(context.guild.roles, name="S&R Digital Open")
+        elif group.lower() == "hrpc":
+            # Fetch the quickfire role
+            announcement_role = discord.utils.get(context.guild.roles, name="Hero Realms Premier Circuit")
+
+        new_tournament_name = f'{tournament_name}'
+        # Create a unique URL
+        unique_url = f"{tournament_name}{int(time.time())}"
+        # Remove spaces and special characters
+        unique_url = re.sub('[^A-Za-z0-9]+', '', unique_url)
         new_tournament = challonge.tournaments.create(new_tournament_name,
                                                       url=unique_url,
                                                       tournament_type=tournament_type,
@@ -63,7 +85,7 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
                               color=0xc27c0e)
         await context.send(embed=embed)
         await context.send(
-            f'Sign ups for  "{new_tournament_name}" are open! Use the "/{group} signup {new_tournament_name}" command to join!')
+            f'{announcement_role.mention} Sign ups for  "{new_tournament_name}" are open! Use the "/{group} signup {new_tournament_name}" command to join!')
 
     # Define the remove_tournament command, which allows a tournament organizer to delete a tournament
     @to.command(
@@ -79,7 +101,7 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
         :param tournament_name: Tournament name.
         """
         tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
+        tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
         if tournament is None:
             embed = discord.Embed(title='Error',
                                   description=f'Tournament "{tournament_name}" not found',
@@ -88,7 +110,7 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
         else:
             challonge.tournaments.destroy(tournament['id'])
             embed = discord.Embed(title='Tournament Removed',
-                                  description=f'{tournament_name} has been removed from active tournaments.',
+                                  description=f'{tournament["name"]} has been removed from active tournaments.',
                                   color=0xc27c0e)
             await context.send(embed=embed)
 
@@ -98,18 +120,37 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
         description="Allows TO to start tournament",
     )
     @commands.has_role("Tournament Organizer")
-    async def start_tournament(self, context: Context, tournament_name: str):
+    async def start_tournament(self, context: Context, tournament_name: str, group: str):
         """
         Allows a Tournament Organizer to start a tournament in Challonge.
 
         :param context: The hybrid command context.
         :param tournament_name: Name of the tournament.
+        :param group: The command group for the type of tournament that is starting (qf, tcl, hl, srdo, hrpc).
         """
+        # lookup announcement role from the group argument.
+        announcement_role = discord.utils.get(context.guild.roles, name="Here")
+        if group.lower() == "qf":
+            # Fetch the quickfire role
+            announcement_role = discord.utils.get(context.guild.roles, name="Quickfire")
+        elif group.lower() == "tcl":
+            # Fetch the quickfire role
+            announcement_role = discord.utils.get(context.guild.roles, name="Thandar Combat League")
+        elif group.lower() == "hl":
+            # Fetch the quickfire role
+            announcement_role = discord.utils.get(context.guild.roles, name="Highlander")
+        elif group.lower() == "srdo":
+            # Fetch the quickfire role
+            announcement_role = discord.utils.get(context.guild.roles, name="S&R Digital Open")
+        elif group.lower() == "hrpc":
+            # Fetch the quickfire role
+            announcement_role = discord.utils.get(context.guild.roles, name="Hero Realms Premier Circuit")
+
         # Get the list of all tournaments
         tournaments = challonge.tournaments.index(state='all')
 
         # Find the tournament by its name
-        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
+        tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
 
         if tournament is None:
             embed = discord.Embed(title='Error!',
@@ -122,7 +163,7 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
 
             challonge.tournaments.start(tournament['id'])
             embed = discord.Embed(title="Tournament Started",
-                                  description=f'Tournament {tournament["name"]} has been started',
+                                  description=f'{announcement_role.mention}, {tournament["name"]} has been started',
                                   color=0x206694)
             await context.send(embed=embed)
 
@@ -139,7 +180,7 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
         :param tournament_name: Tournament name.
         """
         tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
+        tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
 
         if tournament is None:
             embed = discord.Embed(title='Error',
@@ -171,7 +212,7 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
         tournaments = challonge.tournaments.index(state='all')
 
         # Find the tournament by its name
-        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
+        tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
 
         if tournament is None:
             embed = discord.Embed(title='Error!',
@@ -200,7 +241,7 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
         :param name: Name of the player to remove.
         """
         tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
+        tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
 
         if tournament is None:
             embed = discord.Embed(title='Error!',
@@ -212,7 +253,7 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
             participants = challonge.participants.index(tournament['id'])
 
             # Find the player in the list of participants
-            player_participant = next((p for p in participants if p["name"] == name), None)
+            player_participant = next((p for p in participants if p["name"].lower() == name.lower()), None)
 
             if player_participant is None:
                 embed = discord.Embed(title='Error!',
@@ -233,15 +274,34 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
         description="Manually finalizes a Challonge tournament.",
     )
     @commands.has_role("Tournament Organizer")
-    async def finalize(self, context: Context, tournament_name: str):
+    async def finalize(self, context: Context, tournament_name: str, group: str):
         """
         Manually finalizes a Challonge tournament.
 
         :param context: The command context.
         :param tournament_name: Tournament name.
+        :param group: The command group for the type of tournament that is finalizing (qf, tcl, hl, srdo, hrpc).
         """
+        # lookup announcement role from the group argument.
+        announcement_role = discord.utils.get(context.guild.roles, name="Here")
+        if group.lower() == "qf":
+            # Fetch the quickfire role
+            announcement_role = discord.utils.get(context.guild.roles, name="Quickfire")
+        elif group.lower() == "tcl":
+            # Fetch the quickfire role
+            announcement_role = discord.utils.get(context.guild.roles, name="Thandar Combat League")
+        elif group.lower() == "hl":
+            # Fetch the quickfire role
+            announcement_role = discord.utils.get(context.guild.roles, name="Highlander")
+        elif group.lower() == "srdo":
+            # Fetch the quickfire role
+            announcement_role = discord.utils.get(context.guild.roles, name="S&R Digital Open")
+        elif group.lower() == "hrpc":
+            # Fetch the quickfire role
+            announcement_role = discord.utils.get(context.guild.roles, name="Hero Realms Premier Circuit")
+
         tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['name'] == tournament_name), None)
+        tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
 
         if tournament is None:
             embed = discord.Embed(title='Error!',
@@ -266,7 +326,7 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
                 # Create an embed with the winner's information
                 embed = discord.Embed(
                     title=f'Tournament "{tournament_name}" is complete!',
-                    description=f'Congratulations to the winner: {winner_participant["name"]}',
+                    description=f'Congratulations to the winner: {winner_participant["name"]}\n{announcement_role.mention}',
                     color=0x71368a
                 )
                 await context.send(embed=embed)
