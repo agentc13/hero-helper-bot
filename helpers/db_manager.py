@@ -4,7 +4,7 @@ import aiosqlite
 DATABASE_PATH = f"{os.path.realpath(os.path.dirname(__file__))}/../database/database.db"
 
 
-async def get_waitlist() -> list:
+async def get_waitlist():
     """
     This function will return the list of all users on waitlist.
 
@@ -18,7 +18,7 @@ async def get_waitlist() -> list:
             return result
 
 
-async def is_signed_up(user_id: int) -> bool:
+async def is_signed_up(user_id: int):
     """
     This function will check if a user is signed up.
 
@@ -33,7 +33,7 @@ async def is_signed_up(user_id: int) -> bool:
             return result is not None
 
 
-async def add_user_to_waitlist(user_id: int, hr_ign: str) -> int:
+async def add_user_to_waitlist(user_id: int, hr_ign: str):
     """
     This function will add a user based on its ID in the waitlist.
 
@@ -49,7 +49,7 @@ async def add_user_to_waitlist(user_id: int, hr_ign: str) -> int:
             return result[0] if result is not None else 0
 
 
-async def remove_user_from_waitlist(user_id: int) -> int:
+async def remove_user_from_waitlist(user_id: int):
     """
     This function will remove a user based on its ID from the waitlist.
 

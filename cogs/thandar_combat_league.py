@@ -168,7 +168,6 @@ class Tcl(commands.Cog, name="tcl"):
                               color=0x206694)
         await context.send(embed=embed)
 
-
     @tcl.command(
         base="tcl",
         name="standings",
