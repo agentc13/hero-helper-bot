@@ -3,12 +3,11 @@ Use players challonge account for specific events instead of creating a nickname
 Fix bracket command to not be so janky.
 
 **Thandar Combat League:**
-Report match score command - participants (THIS WILL NEED TO ENTER ACTUAL SCORE RESULTS!)
-Fix weekly match announcement command (to only show the new round and outstanding matches) - TO
-Fix remove_waitlist command-TO
-Division standings command (also shows current/outstanding matches) - participants
+Standings command - participants
+
 Create start command for league season (combines start division for all divisions) - TO
 Finalize season command (combines finalize division for all divisions) - TO
+
 Automate weekly announcements - AC13
 Promote/demote automation (auto assigns division roles?) - AC13
 

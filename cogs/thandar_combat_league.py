@@ -12,6 +12,11 @@ class Tcl(commands.Cog, name="tcl"):
     def __init__(self, bot):
         self.bot = bot
 
+        # Set Challonge API credentials
+        key = self.bot.config["CHALLONGE_KEY"]
+        user = self.bot.config["CHALLONGE_USER"]
+        challonge.set_credentials(user, key)
+
     @commands.hybrid_group(
         name="tcl",
         description="Command group for Thandar Combat League.",
@@ -35,6 +40,7 @@ class Tcl(commands.Cog, name="tcl"):
                             "`add` - Add a user to a Thandar Combat League division.\n"
                             "`remove` - Remove a user from Thandar Combat League division.\n"
                             "`show_division` - Lists players in a Thandar Combat League division.\n"
+                            "`show_waitlist` - Lists all players signed up for Thandar Combat League.\n"
                             "`matches` - Posts matches for the week, and lists unreported matches from previous weeks.\n"
                             "`start_division` - Starts a Thandar Combat League division for the season.\n"
                             "`end_division` - Finalizes a Thandar Combat League division for the season.",
@@ -87,24 +93,93 @@ class Tcl(commands.Cog, name="tcl"):
         name="report",
         description="Allows user to report a Thandar Combat League match result.",
     )
-    async def report(self, context: Context):
+    async def report(self, context: Context, division_name: str, round_number: int, winner_name: str, games_won_by_winner: int):
         """
         Allows user to report a Thandar Combat League match result.
 
         :param context: The hybrid command context.
+        :param division_name: The name of the division.
+        :param round_number: The round number in which the match took place.
+        :param winner_name: The name of the winner of the match.
+        :param games_won_by_winner: The number of games won by the winner of the match.
         """
-        pass
+        # Calculate loser's score by subtracting winner's score from total score (3)
+        games_won_by_loser = 3 - games_won_by_winner
+
+        # Check if the winner's score is valid (between 0 and 3)
+        if games_won_by_loser < 0 or games_won_by_winner not in [2, 3]:
+            embed = discord.Embed(title='Error!',
+                                  description='Winner score is incorrect. It must be 2 or 3.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+            return
+
+        # Get all tournaments from the Challonge API
+        tournaments = challonge.tournaments.index(state='all')
+
+        # Find the tournament with the specified division name
+        tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
+
+        # Check if the tournament was found
+        if tournament is None:
+            embed = discord.Embed(title='Error!',
+                                  description=f'TDivision "{division_name}" not found.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+            return
+
+        # Get all participants of the found tournament
+        participants = challonge.participants.index(tournament['id'])
+
+        # Find the participant with the specified winner's name
+        winner = next((p for p in participants if p['name'].lower() == winner_name.lower()), None)
+
+        # Check if the winner was found
+        if winner is None:
+            embed = discord.Embed(title='Error!',
+                                  description=f'Participant "{winner_name}" not found.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+            return
+
+        # Get all open matches of the tournament
+        matches = challonge.matches.index(tournament['id'], state='open')
+
+        # Find the match with the specified round number and the winner as one of the players
+        match = next((m for m in matches if m['round'] == round_number and (m['player1_id'] == winner['id'] or m['player2_id'] == winner['id'])), None)
+
+        # Check if the match was found
+        if match is None:
+            embed = discord.Embed(title='Error!',
+                                  description=f'Match for round "{round_number}" not found or match already closed.',
+                                  color=0xe74c3c)
+            await context.send(embed=embed)
+            return
+
+        # Update the match with the winner's and loser's scores and set the winner
+        if match['player1_id'] == winner['id']:
+            challonge.matches.update(tournament['id'], match['id'], scores_csv=f"{games_won_by_winner}-{games_won_by_loser}", winner_id=winner['id'])
+        else:
+            challonge.matches.update(tournament['id'], match['id'], scores_csv=f"{games_won_by_loser}-{games_won_by_winner}", winner_id=winner['id'])
+
+        # Send a success message to the user
+        embed = discord.Embed(title="Match Reported",
+                              description=f'Match result has been reported. Winner: {winner_name}, Score: {games_won_by_winner}-{games_won_by_loser}',
+                              color=0x206694)
+        await context.send(embed=embed)
+
 
     @tcl.command(
         base="tcl",
         name="standings",
         description="Display the standings for a Thandar Combat League division.",
     )
-    async def standings(self, context: Context):
+    async def standings(self, context: Context, division_name: str):
         """
         Display the standings for a Thandar Combat League division.
 
         :param context: The hybrid command context.
+        :param division_name: The name of the Thandar Combat League division.
         """
         pass
 
@@ -282,15 +357,16 @@ class Tcl(commands.Cog, name="tcl"):
     @tcl.command(
         base="tcl",
         name="matches",
-        description="Display the weeks' matches for a Thandar Combat League division.",
+        description="Display the weeks' matches for a Thandar Combat League division up to a specified round.",
     )
     @commands.has_role("Tournament Organizer")
-    async def matches(self, context: Context, division_name: str):
+    async def matches(self, context: Context, division_name: str, max_round: int):
         """
-        Display the weeks' matches for a Thandar Combat League division.
+        Display the weeks' matches for a Thandar Combat League division up to a specified round.
 
         :param context: The hybrid command context.
-        :param division_name: Name of tournament whose matches will be returned.
+        :param division_name: Name of the tournament whose matches will be returned.
+        :param max_round: The maximum round to display matches for.
         """
         tournaments = challonge.tournaments.index(state='all')
         tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
@@ -300,11 +376,13 @@ class Tcl(commands.Cog, name="tcl"):
                                   color=0xe74c3c)
             await context.send(embed=embed)
         else:
-            matches = challonge.matches.index(tournament['id'], state='all')
+            matches = challonge.matches.index(tournament['id'], state='open')
             participants = challonge.participants.index(tournament['id'])
             participant_ids = {p['id']: p for p in participants}
             bracket = []
             for match in matches:
+                if match['round'] > max_round:
+                    continue
                 if match['player1_id'] is not None and match['player2_id'] is not None:
                     p1_name = participant_ids[match['player1_id']]['name']
                     p2_name = participant_ids[match['player2_id']]['name']
@@ -322,7 +400,7 @@ class Tcl(commands.Cog, name="tcl"):
 
             await context.send(embed=embed)
 
-    # Define the start_division command, which allows a tournament organizer to start a round robin tournament for a division.
+            # Define the start_division command, which allows a tournament organizer to start a round robin tournament for a division.
     @tcl.command(
         name="start_division",
         description="Allows TO to start division",
