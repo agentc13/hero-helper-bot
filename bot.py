@@ -4,7 +4,6 @@ import logging
 import os
 import platform
 import sys
-import datetime
 
 import aiosqlite
 import discord
@@ -153,15 +152,14 @@ async def on_command_completion(context: Context):
     full_command_name = context.command.qualified_name
     split = full_command_name.split(" ")
     executed_command = str(split[0])
-    timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     if context.guild is not None:
         bot.logger.info(
-            f"[{timestamp}] Executed {executed_command} command in {context.guild.name} (ID: {context.guild.id}) by {context.author} "
+            f"Executed {executed_command} command in {context.guild.name} (ID: {context.guild.id}) by {context.author} "
             f"(ID: {context.author.id})"
         )
     else:
         bot.logger.info(
-            f"[{timestamp}] Executed {executed_command} command by {context.author} (ID: {context.author.id}) in DMs"
+            f"Executed {executed_command} command by {context.author} (ID: {context.author.id}) in DMs"
         )
 
 
@@ -173,8 +171,6 @@ async def on_command_error(context: Context, error):
     :param context: The context of the normal command that failed executing.
     :param error: The error that has been faced.
     """
-    timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
     if isinstance(error, commands.CommandOnCooldown):
         minutes, seconds = divmod(error.retry_after, 60)
         hours, minutes = divmod(minutes, 60)
@@ -195,12 +191,12 @@ async def on_command_error(context: Context, error):
         await context.send(embed=embed)
         if context.guild:
             bot.logger.warning(
-                f"[{timestamp}] {context.author} (ID: {context.author.id}) tried to execute a command in the guild "
+                f"{context.author} (ID: {context.author.id}) tried to execute a command in the guild "
                 f"{context.guild.name} (ID: {context.guild.id}), but the user is blacklisted from using the bot."
             )
         else:
             bot.logger.warning(
-                f"[{timestamp}] {context.author} (ID: {context.author.id}) tried to execute a command in the bot's DMs, but the user "
+                f"{context.author} (ID: {context.author.id}) tried to execute a command in the bot's DMs, but the user "
                 f"is blacklisted from using the bot."
             )
     elif isinstance(error, exceptions.UserNotOwner):
@@ -213,12 +209,12 @@ async def on_command_error(context: Context, error):
         await context.send(embed=embed)
         if context.guild:
             bot.logger.warning(
-                f"[{timestamp}] {context.author} (ID: {context.author.id}) tried to execute an owner only command in the guild "
+                f"{context.author} (ID: {context.author.id}) tried to execute an owner only command in the guild "
                 f"{context.guild.name} (ID: {context.guild.id}), but the user is not an owner of the bot."
             )
         else:
             bot.logger.warning(
-                f"[{timestamp}] {context.author} (ID: {context.author.id}) tried to execute an owner only command in the bot's DMs, "
+                f"{context.author} (ID: {context.author.id}) tried to execute an owner only command in the bot's DMs, "
                 f"but the user is not an owner of the bot."
             )
     elif isinstance(error, commands.MissingPermissions):
