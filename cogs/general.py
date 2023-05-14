@@ -33,17 +33,17 @@ class General(commands.Cog, name="general"):
                     continue
 
                 if isinstance(command, commands.Group):
-                    data.append(f"/{command.name} - {command.short_doc}")
+                    data.append(f"`/{command.name}` - {command.short_doc}")
                     for subcommand in command.commands:
                         if not subcommand.hidden:  # check if the subcommand is hidden
-                            data.append(f"/{command.name} {subcommand.name} - {subcommand.short_doc}")
+                            data.append(f"`/{command.name} {subcommand.name}` - {subcommand.short_doc}")
                 else:
-                    data.append(f"/{command.name} - {command.short_doc}")
+                    data.append(f"`/{command.name}` - {command.short_doc}")
 
             if data:
                 help_text = "\n".join(data)
                 embed.add_field(
-                    name=cog.qualified_name, value=f"```{help_text}```", inline=False
+                    name=cog.qualified_name, value=help_text, inline=False  # Removed the code block wrapper
                 )
 
         await context.send(embed=embed)
