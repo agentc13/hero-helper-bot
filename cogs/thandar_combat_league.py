@@ -37,11 +37,11 @@ class Tcl(commands.Cog, name="tcl"):
                             "**Tournament Organizer Only**\n"
                             "`remove_waitlist` - Removes a player from the Thandar Combat League waitlist.\n"
                             "`create_division` - Creates a new Thandar Combat League division.\n"
-                            "`add` - Add a user to a Thandar Combat League division.\n"
-                            "`remove` - Remove a user from Thandar Combat League division.\n"
+                            "`add_player` - Add a user to a Thandar Combat League division.\n"
+                            "`remove_player` - Remove a user from Thandar Combat League division.\n"
                             "`show_division` - Lists players in a Thandar Combat League division.\n"
                             "`show_waitlist` - Lists all players signed up for Thandar Combat League.\n"
-                            "`matches` - Posts matches for the week, and lists unreported matches from previous weeks.\n"
+                            "`show_matches` - Posts matches for the week, and lists unreported matches from previous weeks.\n"
                             "`start_division` - Starts a Thandar Combat League division for the season.\n"
                             "`end_division` - Finalizes a Thandar Combat League division for the season.",
                 color=0x992d22,
@@ -242,11 +242,11 @@ class Tcl(commands.Cog, name="tcl"):
     # Tournament Organizer command to add players into a specified division.
     @tcl.command(
         base="tcl",
-        name="add",
+        name="add_player",
         description="Adds player to Thandar Combat League division.",
     )
     @commands.has_role("Tournament Organizer")
-    async def add(self, context: Context, division_name: str, hr_ign: str):
+    async def add_player(self, context: Context, division_name: str, hr_ign: str):
         """
         Adds player to Thandar Combat League division.
 
@@ -275,11 +275,11 @@ class Tcl(commands.Cog, name="tcl"):
 
     @tcl.command(
         base="tcl",
-        name="remove",
+        name="remove_player",
         description="Removes a player from a Thandar Combat League waitlist.",
     )
     @commands.has_role("Tournament Organizer")
-    async def remove(self, context: Context, user: discord.User):
+    async def remove_player(self, context: Context, user: discord.User):
         """
         Removes a player from the Thandar Combat League waitlist.
 
@@ -355,11 +355,11 @@ class Tcl(commands.Cog, name="tcl"):
 
     @tcl.command(
         base="tcl",
-        name="matches",
+        name="show_matches",
         description="Display the weeks' matches for a Thandar Combat League division up to a specified round.",
     )
     @commands.has_role("Tournament Organizer")
-    async def matches(self, context: Context, division_name: str, max_round: int):
+    async def show_matches(self, context: Context, division_name: str, max_round: int):
         """
         Display the weeks' matches for a Thandar Combat League division up to a specified round.
 
