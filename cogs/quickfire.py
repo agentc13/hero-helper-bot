@@ -40,9 +40,7 @@ class Quickfire(commands.Cog, name="quickfire"):
                             "`show_matches` - Lists the matches in a specified Quickfire tournament.\n"
                             "`bracket_link` - Posts the link to a Quickfire tournament bracket in Challonge.\n"
                             "`bracket` - Posts screenshot of current Challonge bracket for a specified Quickfire tournament.\n"
-                            "`report` - Allows user to report a match result for a specific Quickfire tournament.\n\n"
-                            "**Tournament Organizer Only**\n"
-                            "`create_tournament` - Creates a Quickfire tournament in Challonge.\n",
+                            "`report` - Allows user to report a match result for a specific Quickfire tournament.\n",
 
                 color=0x992d22,
             )
@@ -448,6 +446,7 @@ class Quickfire(commands.Cog, name="quickfire"):
     @qf.command(
         name="add_player",
         description="Allows TO to manually add a player to a Quickfire tournament",
+        hidden=True,
     )
     @commands.has_role("Tournament Organizer")
     async def add_player(self, context: Context, tournament_name: str, player_name: str):

@@ -90,12 +90,12 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
     # Define the remove_tournament command, which allows a tournament organizer to delete a tournament
     @to.command(
         name="remove_tournament",
-        description="Allows TO to delete a tournament from Challonge.",
+        description="Allows a Tournament Organizer to delete a tournament from Challonge.",
     )
     @commands.has_role("Tournament Organizer")
     async def remove_tournament(self, context: Context, tournament_name: str):
         """
-        Allows TO to delete a tournament from Challonge.
+        Allows a Tournament Organizer to delete a tournament from Challonge.
 
         :param context: The hybrid command context.
         :param tournament_name: Tournament name.
@@ -117,7 +117,7 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
     # Define the start_tournament command, which allows a tournament organizer to start a tournament
     @to.command(
         name="start_tournament",
-        description="Allows TO to start tournament",
+        description="Allows a Tournament Organizer to start a tournament in Challonge.",
     )
     @commands.has_role("Tournament Organizer")
     async def start_tournament(self, context: Context, tournament_name: str, group: str):
@@ -169,7 +169,7 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
 
     @to.command(
         name="reset_tournament",
-        description="Allows TO to reset a tournament.",
+        description="Resets a Challonge tournament by its name.",
     )
     @commands.has_role("Tournament Organizer")
     async def reset_tournament(self, context: Context, tournament_name: str):

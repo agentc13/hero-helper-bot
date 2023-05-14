@@ -13,6 +13,7 @@ class Owner(commands.Cog, name="owner"):
     @commands.command(
         name="sync",
         description="Synchronize the slash commands.",
+        hidden=True,
     )
     @app_commands.describe(scope="The scope of the sync. Can be `global` or `guild`")
     @checks.is_owner()
@@ -49,6 +50,7 @@ class Owner(commands.Cog, name="owner"):
     @commands.command(
         name="unsync",
         description="Unsynchronize the slash commands.",
+        hidden=True,
     )
     @app_commands.describe(
         scope="The scope of the sync. Can be `global`, `current_guild` or `guild`"
@@ -88,6 +90,7 @@ class Owner(commands.Cog, name="owner"):
     @commands.hybrid_command(
         name="load",
         description="Load a cog",
+        hidden=True,
     )
     @app_commands.describe(cog="The name of the cog to load")
     @checks.is_owner()
@@ -114,6 +117,7 @@ class Owner(commands.Cog, name="owner"):
     @commands.hybrid_command(
         name="unload",
         description="Unloads a cog.",
+        hidden=True,
     )
     @app_commands.describe(cog="The name of the cog to unload")
     @checks.is_owner()
@@ -140,6 +144,7 @@ class Owner(commands.Cog, name="owner"):
     @commands.hybrid_command(
         name="reload",
         description="Reloads a cog.",
+        hidden=True,
     )
     @app_commands.describe(cog="The name of the cog to reload")
     @checks.is_owner()
@@ -166,6 +171,7 @@ class Owner(commands.Cog, name="owner"):
     @commands.hybrid_command(
         name="shutdown",
         description="Make the bot shutdown.",
+        hidden=True,
     )
     @checks.is_owner()
     async def shutdown(self, context: Context) -> None:

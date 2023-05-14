@@ -9,36 +9,53 @@ class General(commands.Cog, name="general"):
     def __init__(self, bot):
         self.bot = bot
 
-    # Help command
     @commands.hybrid_command(
-        name="help", description="List all commands the bot has loaded."
+        name="help",
+        description="List all commands the bot has loaded."
     )
-    async def help(self, context: Context) -> None:
-        prefix = self.bot.config["prefix"]
+    async def help(self, context: Context):
+        """
+        Lists all commands the bot has loaded.
+
+        :param context: The hybrid command context.
+        """
         embed = discord.Embed(
-            title="Help", description="List of available commands:", color=0x11806a
+            title="Help",
+            description="List of available commands:",
+            color=0x11806a
         )
-        for i in self.bot.cogs:
-            cog = self.bot.get_cog(i.lower())
-            commands = cog.get_commands()
+
+        for cog in self.bot.cogs.values():
             data = []
-            for command in commands:
-                description = command.description.partition("\n")[0]
-                data.append(f"{prefix}{command.name} - {description}")
-            help_text = "\n".join(data)
-            embed.add_field(
-                name=i.capitalize(), value=f"```{help_text}```", inline=False
-            )
+
+            for command in cog.get_commands():
+                if command.hidden:
+                    continue
+
+                if isinstance(command, commands.Group):
+                    data.append(f"/{command.name} - {command.short_doc}")
+                    for subcommand in command.commands:
+                        if not subcommand.hidden:  # check if the subcommand is hidden
+                            data.append(f"/{command.name} {subcommand.name} - {subcommand.short_doc}")
+                else:
+                    data.append(f"/{command.name} - {command.short_doc}")
+
+            if data:
+                help_text = "\n".join(data)
+                embed.add_field(
+                    name=cog.qualified_name, value=f"```{help_text}```", inline=False
+                )
+
         await context.send(embed=embed)
 
     # botinfo command
     @commands.hybrid_command(
-        name="bot_info",
-        description="Get some information about the bot.",
+        name="botinfo",
+        description="Information about the Hero-Helper Discord Bot.",
     )
-    async def bot_info(self, context: Context) -> None:
+    async def botinfo(self, context: Context):
         """
-        Get some useful (or not) information about the bot.
+        Information about the Hero-Helper Discord Bot.
 
         :param context: The hybrid command context.
         """
@@ -61,12 +78,12 @@ class General(commands.Cog, name="general"):
 
     # serverinfo command
     @commands.hybrid_command(
-        name="server_info",
-        description="Get some information about the server.",
+        name="serverinfo",
+        description="Information about the discord server.",
     )
-    async def server_info(self, context: Context) -> None:
+    async def serverinfo(self, context: Context):
         """
-        Get some useful (or not) information about the server.
+        Information about the discord server.
 
         :param context: The hybrid command context.
         """
@@ -95,7 +112,7 @@ class General(commands.Cog, name="general"):
     #     name="invite_link",
     #     description="Get the invite link of the bot to be able to invite it.",
     # )
-    # async def invite_link(self, context: Context) -> None:
+    # async def invite_link(self, context: Context):
     #     """
     #     Get the invite link of the bot to be able to invite it to a server.
     #
@@ -115,11 +132,12 @@ class General(commands.Cog, name="general"):
     @commands.hybrid_command(
         name="purge",
         description="Delete a number of messages.",
+        hidden=True,
     )
     @commands.has_guild_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
     @app_commands.describe(amount="The amount of messages that should be deleted.")
-    async def purge(self, context: Context, amount: int) -> None:
+    async def purge(self, context: Context, amount: int):
         """
         Delete a number of messages.
 
