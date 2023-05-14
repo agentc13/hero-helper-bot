@@ -82,12 +82,6 @@ class Quickfire(commands.Cog, name="Quickfire"):
             participants = challonge.participants.index(tournament['id'])
             num_participants = len(participants)
             if num_participants < 16:
-                # embed = discord.Embed(title="Add Participant",
-                #                       description=f"Please enter your IGN (In Game Name) to be added to tournament {tournament_name}",
-                #                       color=0x1f8b4c)
-                # await context.send(embed=embed)
-                # participant_name = await self.bot.wait_for('message', check=lambda m: m.author == context.author)
-
                 # Check if the participant name already exists
                 if any(p['name'].lower() == participant_name.lower() for p in participants):
                     embed = discord.Embed(title='Error!',
