@@ -56,8 +56,8 @@ class LoggingFormatter(logging.Formatter):
 
     def format(self, record):
         log_color = self.COLORS[record.levelno]
-        format = "(black){asctime}(reset) (levelcolor){levelname:<8}(reset) (green){name}(reset) {message}"
-        format = format.replace("(black)", self.black + self.bold)
+        format = "(gray){asctime}(reset) (levelcolor){levelname:<8}(reset) (green){name}(reset) {message}"
+        format = format.replace("(gray)", self.gray + self.bold)
         format = format.replace("(reset)", self.reset)
         format = format.replace("(levelcolor)", log_color)
         format = format.replace("(green)", self.green + self.bold)
@@ -83,6 +83,17 @@ logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 bot.logger = logger
 
+logger_discord_client = logging.getLogger("discord.client")
+logger_discord_client.setLevel(logging.INFO)
+logger_discord_client.addHandler(console_handler)
+logger_discord_client.addHandler(file_handler)
+logger_discord_client.propagate = False  # avoid duplicate logs
+
+logger_discord_gateway = logging.getLogger("discord.gateway")
+logger_discord_gateway.setLevel(logging.INFO)
+logger_discord_gateway.addHandler(console_handler)
+logger_discord_gateway.addHandler(file_handler)
+logger_discord_gateway.propagate = False  # avoid duplicate logs
 
 async def init_db():
     async with aiosqlite.connect(
