@@ -41,9 +41,6 @@ Event/season points - AC13
 Top 4 invites - AC13
 Invitational stuff - AC13
 
-**Tournament Organizer**
-Add automation
-
 **Other stuff:**
 Add more roles for role checks.
 Add meme commands. (ala carl-bot)

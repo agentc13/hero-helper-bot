@@ -20,8 +20,10 @@ class General(commands.Cog, name="General"):
         :param context: The hybrid command context.
         """
         embed = discord.Embed(
-            title="Help",
-            description="List of available commands:",
+            title="Hero-Helper Bot Help",
+            description="**All commands start with /**\n"
+                        "Commands in a group will begin with the group prefix, then the specific command.\n\n"
+                        "Tutorial videos can be found on the [Sparks & Recreation YouTube channel](https://www.youtube.com/channel/UCB0NTwcFo8N3z02SVwsHvCg).",
             color=0x11806a
         )
 
