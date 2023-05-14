@@ -44,8 +44,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
     )
     async def signup(self, context: Context, hr_ign: str):
         """
-        Sign up for Thandar Combat League. You will receive a DM with the rules
-        link and be added to the list of players for the next season.
+        Sign up for Thandar Combat League.
 
         :param context: The hybrid command context.
         :param hr_ign: Your Hero Realms In Game Name.

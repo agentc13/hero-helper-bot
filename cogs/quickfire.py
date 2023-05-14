@@ -49,11 +49,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
     # Define the signup command, which allows a user to sign up for a tournament
     @qf.command(
         name="signup",
-        description="Allows user to sign up for the current Quickfire tournament",
+        description="Allows user to sign up for an open Quickfire tournament",
     )
     async def signup(self, context: Context, tournament_name: str):
         """
-        Allows user to sign up for the current Quickfire tournament.
+        Allows user to sign up for an open Quickfire tournament.
 
         :param context: The hybrid command context.
         :param tournament_name: Tournament name.
@@ -112,11 +112,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
     # Define the show_participants command, which allows a tournament organizer to view the list of participants in a tournament
     @qf.command(
         name="show_players",
-        description="Lists participants in a specific Quickfire tournament.",
+        description="Displays participants in a Quickfire tournament.",
     )
     async def show_players(self, context: Context, tournament_name: str):
         """
-        Lists participants in a specific Quickfire tournament.
+        Displays participants in a Quickfire tournament.
 
         :param context: The hybrid command context.
         :param tournament_name: Tournament name.
@@ -148,11 +148,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
     # Define the show_matches command, which returns a list of matches for a tournament
     @qf.command(
         name="show_matches",
-        description="Returns a list of matches for a specific Quickfire tournament.",
+        description="Displays open matches for a Quickfire tournament.",
     )
     async def show_matches(self, context: Context, tournament_name: str):
         """
-        Returns a list of open matches for a specific Quickfire tournament.
+        Displays open matches for a Quickfire tournament.
 
         :param context: The hybrid command context.
         :param tournament_name: Name of tournament whose matches will be returned.
@@ -197,11 +197,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
 
     @qf.command(
         name="bracket_link",
-        description="Displays the tournament bracket from Challonge.",
+        description="Displays the bracket link for the specified tournament.",
     )
     async def bracket_link(self, context: Context, tournament_name: str):
         """
-        Returns the Challonge bracket link for the specified tournament (if in progress).
+        Displays the bracket link for the specified tournament.
 
         :param context: The command context.
         :param tournament_name: Tournament name.
@@ -233,12 +233,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
 
     @qf.command(
         name="bracket",
-        description="Screenshots the tournament bracket from Challonge and posts the image.",
+        description="Displays a screenshot of the tournament bracket.",
     )
     async def bracket(self, context: Context, tournament_name: str):
         """
-        Displays the Challonge bracket image for the specified in progress tournament by taking a screenshot.
-        This is an experimental feature, and may not always work.
+        Displays a screenshot of the tournament bracket.
 
         :param context: The command context.
         :param tournament_name: Tournament name.
@@ -302,11 +301,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
     # Define the show_tournaments command, which lists all current tournaments and their status
     @qf.command(
         name="show_tournaments",
-        description="Returns a list of current Quickfire tournaments and their status.",
+        description="Displays a list of current Quickfire tournaments.",
     )
     async def show_tournaments(self, context: Context):
         """
-        List of current Quickfire tournaments in Challonge and their status.
+        Displays a list of current Quickfire tournaments.
 
         :param context: The hybrid command context.
         """
@@ -324,11 +323,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
     # Define the report command, which allows users to report the result of a match
     @qf.command(
         name="report",
-        description="Allows user to report a Quickfire match result.",
+        description="Report a Quickfire match result.",
     )
     async def report(self, context: Context, tournament_name: str, round_number: int, winner: str):
         """
-        Report the result of a match in the specified Quickfire tournament using the round number.
+        Report a Quickfire match result.
 
         :param context: The hybrid command context.
         :param tournament_name: Tournament name.
@@ -445,13 +444,13 @@ class Quickfire(commands.Cog, name="Quickfire"):
     # Define the add_player command which allows a Tournament Organizer to add a player to Quickfire tournaments manually.
     @qf.command(
         name="add_player",
-        description="Allows TO to manually add a player to a Quickfire tournament",
+        description="Allows Tournament Organizer to add a player to a Quickfire tournament.",
         hidden=True,
     )
     @commands.has_role("Tournament Organizer")
     async def add_player(self, context: Context, tournament_name: str, player_name: str):
         """
-        Add player to tournament.
+        Allows Tournament Organizer to add a player to a Quickfire tournament.
 
         :param context: The hybrid command context.
         :param tournament_name: Name of the tournament.
