@@ -7,7 +7,7 @@ from discord.ext.commands import Context
 
 
 # Define the Quickfire class, which is a subclass of commands.Cog
-class TournamentOrganizer(commands.Cog, name="tournament organizer"):
+class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
     def __init__(self, bot):
         self.bot = bot
 
@@ -169,12 +169,12 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
 
     @to.command(
         name="reset_tournament",
-        description="Resets a Challonge tournament by its name.",
+        description="Allows a Tournament Organizer to reset a Challonge tournament by its name.",
     )
     @commands.has_role("Tournament Organizer")
     async def reset_tournament(self, context: Context, tournament_name: str):
         """
-        Resets a Challonge tournament by its name.
+        Allows a Tournament Organizer to reset a Challonge tournament by its name.
 
         :param context: The hybrid command context.
         :param tournament_name: Tournament name.
@@ -271,12 +271,12 @@ class TournamentOrganizer(commands.Cog, name="tournament organizer"):
 
     @to.command(
         name="finalize",
-        description="Manually finalizes a Challonge tournament.",
+        description="Allows a Tournament organizer to manually finalize a Challonge tournament.",
     )
     @commands.has_role("Tournament Organizer")
     async def finalize(self, context: Context, tournament_name: str, group: str):
         """
-        Manually finalizes a Challonge tournament.
+        Allows a Tournament organizer to manually finalize a Challonge tournament.
 
         :param context: The command context.
         :param tournament_name: Tournament name.

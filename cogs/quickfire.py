@@ -11,7 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 
 # Define the Quickfire class, which is a subclass of commands.Cog
-class Quickfire(commands.Cog, name="quickfire"):
+class Quickfire(commands.Cog, name="Quickfire"):
     def __init__(self, bot):
         self.bot = bot
 

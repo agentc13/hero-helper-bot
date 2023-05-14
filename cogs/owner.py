@@ -6,7 +6,7 @@ from discord.ext.commands import Context
 from helpers import checks
 
 
-class Owner(commands.Cog, name="owner"):
+class Owner(commands.Cog, name="Owner"):
     def __init__(self, bot):
         self.bot = bot
 

@@ -38,7 +38,7 @@ gambits = '1: No Heroes\n2: Double Health\n3: Each Player May Ban 1 Class\n4: No
               '18: Level 5 Match\n19: Level 11 Match\n20: No Gambit'
 
 
-class Gambits(commands.Cog, name="gambits"):
+class Gambits(commands.Cog, name="Gambits"):
     def __init__(self, bot):
         self.bot = bot
 
@@ -48,7 +48,7 @@ class Gambits(commands.Cog, name="gambits"):
         description="Selects a random gambit from the gambit list.",
     )
     async def gambit(self, context: Context):
-        """Random roll for gambit effect."""
+        """Selects a random gambit from the gambit list."""
         result = random.choice(roll_effect)
         embed = discord.Embed(
             description=f"{result}",
@@ -63,7 +63,7 @@ class Gambits(commands.Cog, name="gambits"):
         description="Prints the gambit list.",
     )
     async def gambitlist(self, context: Context):
-        """Sends the Gambit Effect List."""
+        """Displays the entire Gambit Effect List."""
         embed = discord.Embed(
             description=f"{gambits}",
             color=0x1f8b4c,

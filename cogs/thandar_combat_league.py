@@ -8,7 +8,7 @@ from discord.ext.commands import Context
 from helpers import db_manager
 
 
-class Tcl(commands.Cog, name="tcl"):
+class Tcl(commands.Cog, name="Thandar Combat League"):
     def __init__(self, bot):
         self.bot = bot
 
