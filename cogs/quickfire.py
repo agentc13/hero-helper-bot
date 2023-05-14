@@ -51,12 +51,13 @@ class Quickfire(commands.Cog, name="Quickfire"):
         name="signup",
         description="Allows user to sign up for an open Quickfire tournament",
     )
-    async def signup(self, context: Context, tournament_name: str):
+    async def signup(self, context: Context, tournament_name: str, participant_name: str):
         """
         Allows user to sign up for an open Quickfire tournament.
 
         :param context: The hybrid command context.
         :param tournament_name: Tournament name.
+        :param participant_name: Hero Realms IGN.
         """
         # check if the tournament_name includes 'quickfire'
         if 'quickfire' not in tournament_name:
@@ -78,15 +79,32 @@ class Quickfire(commands.Cog, name="Quickfire"):
             await context.send(embed=embed)
         else:
             # If the tournament exists, check the number of participants
-            num_participants = len(challonge.participants.index(tournament['id']))
+            participants = challonge.participants.index(tournament['id'])
+            num_participants = len(participants)
             if num_participants < 16:
-                embed = discord.Embed(title="Add Participant",
-                                      description=f"Please enter your IGN (In Game Name) to be added to tournament {tournament_name}",
-                                      color=0x1f8b4c)
-                await context.send(embed=embed)
-                participant_name = await self.bot.wait_for('message', check=lambda m: m.author == context.author)
-                participant = challonge.participants.create(tournament['id'], participant_name.content)
-                num_participants += 1
+                # embed = discord.Embed(title="Add Participant",
+                #                       description=f"Please enter your IGN (In Game Name) to be added to tournament {tournament_name}",
+                #                       color=0x1f8b4c)
+                # await context.send(embed=embed)
+                # participant_name = await self.bot.wait_for('message', check=lambda m: m.author == context.author)
+
+                # Check if the participant name already exists
+                if any(p['name'].lower() == participant_name.lower() for p in participants):
+                    embed = discord.Embed(title='Error!',
+                                          description=f'IGN "{participant_name}" is already signed up.',
+                                          color=0xe74c3c)
+                    await context.send(embed=embed)
+                else:
+                    participant = challonge.participants.create(tournament['id'], participant_name)
+                    num_participants += 1
+                    embed = discord.Embed(title="Participant Added",
+                                          description=f'Participant "{participant["name"]}" has been added to tournament "{tournament_name}"',
+                                          color=0x1f8b4c)
+                    await context.send(embed=embed)
+                    # Gives user the Quickfire Role
+                    role = discord.utils.get(context.guild.roles, id=1104624377313624066)
+                    if role is not None:
+                        await context.author.add_roles(role)
                 if num_participants == 16:
                     # Start the tournament and create a new tournament with the same name
                     challonge.tournaments.start(tournament['id'])
@@ -99,15 +117,6 @@ class Quickfire(commands.Cog, name="Quickfire"):
                                           description=f'Tournament "{new_tournament_name}" has started! A new tournament "{new_tournament_name}" has been created.',
                                           color=0xc27c0e)
                     await context.send(embed=embed)
-
-                else:
-                    embed = discord.Embed(title="Participant Added",
-                                          description=f'Participant "{participant["name"]}" has been added to tournament "{tournament_name}"',
-                                          color=0x1f8b4c)
-                    await context.send(embed=embed)
-                    # Gives user the Quickfire Role
-                    role = discord.utils.get(context.guild.roles, id=1104624377313624066)
-                    await context.author.add_roles(role)
 
     # Define the show_participants command, which allows a tournament organizer to view the list of participants in a tournament
     @qf.command(
