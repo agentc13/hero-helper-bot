@@ -4,6 +4,7 @@ import logging
 import os
 import platform
 import sys
+import datetime
 
 import aiosqlite
 import discord
@@ -106,11 +107,11 @@ bot.config = config
 
 
 @bot.event
-async def on_ready() -> None:
+async def on_ready():
     """
     The code in this event is executed when the bot is ready.
     """
-    bot.logger.info(f"Logged in as {bot.user.name}")
+    bot.logger.info(f"Logged in as {bot.user.name} ")
     bot.logger.info(f"discord.py API version: {discord.__version__}")
     bot.logger.info(f"Python version: {platform.python_version()}")
     bot.logger.info(f"Running on: {platform.system()} {platform.release()} ({os.name})")
@@ -122,7 +123,7 @@ async def on_ready() -> None:
 
 
 @tasks.loop(minutes=1.0)
-async def status_task() -> None:
+async def status_task():
     """
     Set up the discord status task of the bot.
     """
@@ -131,7 +132,7 @@ async def status_task() -> None:
 
 
 @bot.event
-async def on_message(message: discord.Message) -> None:
+async def on_message(message: discord.Message):
     """
     The code in this event is executed every time someone sends a message, with or without the prefix
 
@@ -143,7 +144,7 @@ async def on_message(message: discord.Message) -> None:
 
 
 @bot.event
-async def on_command_completion(context: Context) -> None:
+async def on_command_completion(context: Context):
     """
     The code in this event is executed every time a normal command has been *successfully* executed.
 
@@ -152,25 +153,28 @@ async def on_command_completion(context: Context) -> None:
     full_command_name = context.command.qualified_name
     split = full_command_name.split(" ")
     executed_command = str(split[0])
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     if context.guild is not None:
         bot.logger.info(
-            f"Executed {executed_command} command in {context.guild.name} (ID: {context.guild.id}) by {context.author} "
+            f"[{timestamp}] Executed {executed_command} command in {context.guild.name} (ID: {context.guild.id}) by {context.author} "
             f"(ID: {context.author.id})"
         )
     else:
         bot.logger.info(
-            f"Executed {executed_command} command by {context.author} (ID: {context.author.id}) in DMs"
+            f"[{timestamp}] Executed {executed_command} command by {context.author} (ID: {context.author.id}) in DMs"
         )
 
 
 @bot.event
-async def on_command_error(context: Context, error) -> None:
+async def on_command_error(context: Context, error):
     """
     The code in this event is executed every time a normal valid command catches an error.
 
     :param context: The context of the normal command that failed executing.
     :param error: The error that has been faced.
     """
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
     if isinstance(error, commands.CommandOnCooldown):
         minutes, seconds = divmod(error.retry_after, 60)
         hours, minutes = divmod(minutes, 60)
@@ -191,12 +195,12 @@ async def on_command_error(context: Context, error) -> None:
         await context.send(embed=embed)
         if context.guild:
             bot.logger.warning(
-                f"{context.author} (ID: {context.author.id}) tried to execute a command in the guild "
+                f"[{timestamp}] {context.author} (ID: {context.author.id}) tried to execute a command in the guild "
                 f"{context.guild.name} (ID: {context.guild.id}), but the user is blacklisted from using the bot."
             )
         else:
             bot.logger.warning(
-                f"{context.author} (ID: {context.author.id}) tried to execute a command in the bot's DMs, but the user "
+                f"[{timestamp}] {context.author} (ID: {context.author.id}) tried to execute a command in the bot's DMs, but the user "
                 f"is blacklisted from using the bot."
             )
     elif isinstance(error, exceptions.UserNotOwner):
@@ -209,12 +213,12 @@ async def on_command_error(context: Context, error) -> None:
         await context.send(embed=embed)
         if context.guild:
             bot.logger.warning(
-                f"{context.author} (ID: {context.author.id}) tried to execute an owner only command in the guild "
+                f"[{timestamp}] {context.author} (ID: {context.author.id}) tried to execute an owner only command in the guild "
                 f"{context.guild.name} (ID: {context.guild.id}), but the user is not an owner of the bot."
             )
         else:
             bot.logger.warning(
-                f"{context.author} (ID: {context.author.id}) tried to execute an owner only command in the bot's DMs, "
+                f"[{timestamp}] {context.author} (ID: {context.author.id}) tried to execute an owner only command in the bot's DMs, "
                 f"but the user is not an owner of the bot."
             )
     elif isinstance(error, commands.MissingPermissions):

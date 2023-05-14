@@ -23,7 +23,7 @@ class General(commands.Cog, name="General"):
             title="Hero-Helper Bot Help",
             description="**All commands start with /**\n"
                         "Commands in a group will begin with the group prefix, then the specific command.\n\n"
-                        "Tutorial videos can be found on the [Sparks & Recreation YouTube channel](https://www.youtube.com/channel/UCB0NTwcFo8N3z02SVwsHvCg).",
+                        "Tutorial videos can be found on [agentc13's YouTube channel](https://www.youtube.com/channel/UCUEuO2cFBlw5kh94ENUR0Ag).",
             color=0x11806a
         )
 
