@@ -1,11 +1,8 @@
 import platform
-
-
 import discord
+from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
-
-from helpers import checks
 
 
 class General(commands.Cog, name="general"):
@@ -36,10 +33,10 @@ class General(commands.Cog, name="general"):
 
     # botinfo command
     @commands.hybrid_command(
-        name="botinfo",
-        description="Get some useful (or not) information about the bot.",
+        name="bot_info",
+        description="Get some information about the bot.",
     )
-    async def botinfo(self, context: Context) -> None:
+    async def bot_info(self, context: Context) -> None:
         """
         Get some useful (or not) information about the bot.
 
@@ -64,10 +61,10 @@ class General(commands.Cog, name="general"):
 
     # serverinfo command
     @commands.hybrid_command(
-        name="serverinfo",
-        description="Get some useful (or not) information about the server.",
+        name="server_info",
+        description="Get some information about the server.",
     )
-    async def serverinfo(self, context: Context) -> None:
+    async def server_info(self, context: Context) -> None:
         """
         Get some useful (or not) information about the server.
 
@@ -94,25 +91,45 @@ class General(commands.Cog, name="general"):
         await context.send(embed=embed)
 
     # bot invite command
+    # @commands.hybrid_command(
+    #     name="invite_link",
+    #     description="Get the invite link of the bot to be able to invite it.",
+    # )
+    # async def invite_link(self, context: Context) -> None:
+    #     """
+    #     Get the invite link of the bot to be able to invite it to a server.
+    #
+    #     :param context: The hybrid command context.
+    #     """
+    #     embed = discord.Embed(
+    #         description=f"Invite me by clicking [here](https://discordapp.com/oauth2/authorize?&client_id={self.bot.config['application_id']}&scope=bot+applications.commands&permissions={self.bot.config['permissions']}).",
+    #         color=0xD75BF4,
+    #     )
+    #     try:
+    #         await context.author.send(embed=embed)
+    #         await context.send("I sent you a private message!")
+    #     except discord.Forbidden:
+    #         await context.send(embed=embed)
+
+    # purge command - only works if user has permissions to delete posts.
     @commands.hybrid_command(
-        name="invite",
-        description="Get the invite link of the bot to be able to invite it.",
+        name="purge",
+        description="Delete a number of messages.",
     )
-    async def invite(self, context: Context) -> None:
+    @commands.has_guild_permissions(manage_messages=True)
+    @commands.bot_has_permissions(manage_messages=True)
+    @app_commands.describe(amount="The amount of messages that should be deleted.")
+    async def purge(self, context: Context, amount: int) -> None:
         """
-        Get the invite link of the bot to be able to invite it.
+        Delete a number of messages.
 
         :param context: The hybrid command context.
+        :param amount: The number of messages that should be deleted.
         """
-        embed = discord.Embed(
-            description=f"Invite me by clicking [here](https://discordapp.com/oauth2/authorize?&client_id={self.bot.config['application_id']}&scope=bot+applications.commands&permissions={self.bot.config['permissions']}).",
-            color=0xD75BF4,
+        await context.send(
+            "Deleting messages..."
         )
-        try:
-            await context.author.send(embed=embed)
-            await context.send("I sent you a private message!")
-        except discord.Forbidden:
-            await context.send(embed=embed)
+        await context.channel.purge(limit=amount + 1)
 
 
 async def setup(bot):
