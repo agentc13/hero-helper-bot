@@ -1,6 +1,7 @@
 import discord
 import challonge
 import time
+import operator
 from tabulate import tabulate
 from discord.ext import commands
 from discord.ext.commands import Context
@@ -82,7 +83,8 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         name="report",
         description="Allows user to report a Thandar Combat League match result.",
     )
-    async def report(self, context: Context, division_name: str, round_number: int, winner_name: str, games_won_by_winner: int):
+    async def report(self, context: Context, division_name: str, round_number: int, winner_name: str,
+                     games_won_by_winner: int):
         """
         Allows user to report a Thandar Combat League match result.
 
@@ -92,6 +94,9 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         :param winner_name: The name of the winner of the match.
         :param games_won_by_winner: The number of games won by the winner of the match.
         """
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "b5d0ca83e61253ea7f84a60c"
+
         # Calculate loser's score by subtracting winner's score from total score (3)
         games_won_by_loser = 3 - games_won_by_winner
 
@@ -104,7 +109,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             return
 
         # Get all tournaments from the Challonge API
-        tournaments = challonge.tournaments.index(state='all')
+        tournaments = challonge.tournaments.index(state='all', subdomain=community_name)
 
         # Find the tournament with the specified division name
         tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
@@ -112,7 +117,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         # Check if the tournament was found
         if tournament is None:
             embed = discord.Embed(title='Error!',
-                                  description=f'TDivision "{division_name}" not found.',
+                                  description=f'Division "{division_name}" not found.',
                                   color=0xe74c3c)
             await context.send(embed=embed)
             return
@@ -132,10 +137,11 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             return
 
         # Get all open matches of the tournament
-        matches = challonge.matches.index(tournament['id'], state='open')
+        matches = challonge.matches.index(tournament['id'], state='open', subdomain=community_name)
 
         # Find the match with the specified round number and the winner as one of the players
-        match = next((m for m in matches if m['round'] == round_number and (m['player1_id'] == winner['id'] or m['player2_id'] == winner['id'])), None)
+        match = next((m for m in matches if m['round'] == round_number and (
+                    m['player1_id'] == winner['id'] or m['player2_id'] == winner['id'])), None)
 
         # Check if the match was found
         if match is None:
@@ -147,9 +153,13 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
 
         # Update the match with the winner's and loser's scores and set the winner
         if match['player1_id'] == winner['id']:
-            challonge.matches.update(tournament['id'], match['id'], scores_csv=f"{games_won_by_winner}-{games_won_by_loser}", winner_id=winner['id'])
+            challonge.matches.update(tournament['id'], match['id'],
+                                     scores_csv=f"{games_won_by_winner}-{games_won_by_loser}", winner_id=winner['id'],
+                                     subdomain=community_name)
         else:
-            challonge.matches.update(tournament['id'], match['id'], scores_csv=f"{games_won_by_loser}-{games_won_by_winner}", winner_id=winner['id'])
+            challonge.matches.update(tournament['id'], match['id'],
+                                     scores_csv=f"{games_won_by_loser}-{games_won_by_winner}", winner_id=winner['id'],
+                                     subdomain=community_name)
 
         # Send a success message to the user
         embed = discord.Embed(title="Match Reported",
@@ -169,7 +179,79 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         :param context: The hybrid command context.
         :param division_name: The name of the Thandar Combat League division.
         """
-        pass
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "b5d0ca83e61253ea7f84a60c"
+
+        tournaments = challonge.tournaments.index(subdomain=community_name)
+        tournament = None
+        for t in tournaments:
+            if t['name'].lower() == division_name.lower():
+                tournament = t
+                break
+
+        if tournament is None:
+            await context.send(f"No tournament found with the name: {division_name}")
+            return
+
+        matches = challonge.matches.index(tournament["id"], subdomain=community_name)
+
+        players = {}
+        for match in matches:
+            player1_id = match['player1_id']
+            player2_id = match['player2_id']
+
+            if player1_id not in players:
+                players[player1_id] = {"wins": 0, "losses": 0, "match_wins": 0, "match_losses": 0}
+            if player2_id not in players:
+                players[player2_id] = {"wins": 0, "losses": 0, "match_wins": 0, "match_losses": 0}
+
+            if match['scores_csv']:
+                scores = match['scores_csv'].split('-')
+                player1_score = int(scores[0])
+                player2_score = int(scores[1])
+
+                players[player1_id]['wins'] += player1_score
+                players[player1_id]['losses'] += player2_score
+                players[player2_id]['wins'] += player2_score
+                players[player2_id]['losses'] += player1_score
+
+                # Increment match wins and losses
+                if player1_score > player2_score:
+                    players[player1_id]['match_wins'] += 1
+                    players[player2_id]['match_losses'] += 1
+                else:
+                    players[player1_id]['match_losses'] += 1
+                    players[player2_id]['match_wins'] += 1
+
+        standings = []
+        for player_id, stats in players.items():
+            win_percentage = round(stats['wins'] / (stats['wins'] + stats['losses']) * 100, 2)
+            player = challonge.participants.show(tournament["id"], player_id, subdomain=community_name)
+            standings.append({
+                "name": player['name'],
+                "wins": stats['wins'],
+                "losses": stats['losses'],
+                "win_percentage": win_percentage,
+                "match_wins": stats['match_wins']
+            })
+
+        # Sort by win_percentage, then match wins
+        standings.sort(key=operator.itemgetter('win_percentage', 'match_wins'), reverse=True)
+
+        # Create the embed to be sent
+        embed = discord.Embed(
+            title=f"Division: {tournament['name']}",
+            description="Player statistics",
+            colour=discord.Colour.blue(),
+        )
+        for player in standings:
+            embed.add_field(
+                name=player['name'],
+                value=f"Wins: {player['wins']}\nLosses: {player['losses']}\nWin%: {player['win_percentage']}\nMatch Wins: {player['match_wins']}",
+                inline=False
+            )
+
+        await context.send(embed=embed)
 
     # Start Tournament Organizer specific commands.
     @tcl.command(
@@ -224,6 +306,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
                                                       tournament_type="round robin",
                                                       game_name="Hero Realms Digital",
                                                       ranked_by="points scored",
+                                                      subdomain="b5d0ca83e61253ea7f84a60c",  # Hardcoded community subdomain
                                                       tie_breaks=["match wins", "game win percentage", "points scored"]
                                                       )
         embed = discord.Embed(title="Tournament Created",
@@ -234,24 +317,27 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
     # Tournament Organizer command to add players into a specified division.
     @tcl.command(
         base="tcl",
-        name="add_player",
-        description="Adds player to Thandar Combat League division.",
+        name="add_players",
+        description="Adds players to Thandar Combat League division.",
         hidden=True,
     )
     @commands.has_role("Tournament Organizer")
-    async def add_player(self, context: Context, division_name: str, hr_ign: str):
+    async def add_players(self, context: Context, division_name: str, hr_igns: str):
         """
-        Adds player to Thandar Combat League division.
+        Adds players to Thandar Combat League division.
 
         :param context: The hybrid command context.
-        :param division_name: The Thandar Combat League division that the user should be added to.
-        :param hr_ign: The Hero Realms In Game Name for the user to be added to Thandar Combat League.
+        :param division_name: The Thandar Combat League division that the users should be added to.
+        :param hr_igns: A string of comma-separated Hero Realms In Game Names for the users to be added to Thandar Combat League.
         """
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "b5d0ca83e61253ea7f84a60c"
+
         # Get the list of all tournaments
-        tournaments = challonge.tournaments.index(state='all')
+        tournaments = challonge.tournaments.index(state='pending', subdomain=community_name)
 
         # Find the tournament by its name
-        tournament = next((t for t in tournaments if t['name'] == division_name), None)
+        tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
 
         if tournament is None:
             embed = discord.Embed(title='Error!',
@@ -259,12 +345,15 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
                                   color=0xe74c3c)
             await context.send(embed=embed)
         else:
-            # If the tournament exists, add the participant.
-            participant = challonge.participants.create(tournament['id'], hr_ign)
-            embed = discord.Embed(title="Participant Added",
-                                  description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
-                                  color=0x1f8b4c)
-            await context.send(embed=embed)
+            # If the tournament exists, add the participants.
+            hr_igns_list = [ign.strip() for ign in hr_igns.split(',')]  # Split the input string into a list
+
+            for hr_ign in hr_igns_list:
+                participant = challonge.participants.create(tournament['id'], hr_ign, subdomain=community_name)
+                embed = discord.Embed(title="Participant Added",
+                                      description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
+                                      color=0x1f8b4c)
+                await context.send(embed=embed)
 
     @tcl.command(
         base="tcl",
@@ -311,8 +400,11 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         :param context: The hybrid command context.
         :param division_name: Name of the Thandar Combat League Division.
         """
-        tournaments = challonge.tournaments.index(state='all')
-        tournament = next((t for t in tournaments if t['name'] == division_name), None)
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "b5d0ca83e61253ea7f84a60c"
+
+        tournaments = challonge.tournaments.index(state='all', subdomain=community_name)
+        tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
         if tournament is None:
             embed = discord.Embed(title='Error!',
                                   description=f'Division "{division_name}" not found.',
@@ -364,7 +456,10 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         :param division_name: Name of the tournament whose matches will be returned.
         :param max_round: The maximum round to display matches for.
         """
-        tournaments = challonge.tournaments.index(state='all')
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "b5d0ca83e61253ea7f84a60c"
+
+        tournaments = challonge.tournaments.index(state='all', subdomain=community_name)
         tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
         if tournament is None:
             embed = discord.Embed(title='Error!',
@@ -372,7 +467,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
                                   color=0xe74c3c)
             await context.send(embed=embed)
         else:
-            matches = challonge.matches.index(tournament['id'], state='open')
+            matches = challonge.matches.index(tournament['id'], state='open', subdomain=community_name)
             participants = challonge.participants.index(tournament['id'])
             participant_ids = {p['id']: p for p in participants}
             bracket = []
@@ -397,6 +492,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             await context.send(embed=embed)
 
             # Define the start_division command, which allows a tournament organizer to start a round robin tournament for a division.
+
     @tcl.command(
         base="tcl",
         name="start_division",
@@ -411,8 +507,11 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         :param context: The hybrid command context.
         :param division_name: Name of the division.
         """
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "b5d0ca83e61253ea7f84a60c"
+
         # Get the list of all tournaments
-        tournaments = challonge.tournaments.index(state='all')
+        tournaments = challonge.tournaments.index(state='all', subdomain=community_name)
 
         # Find the tournament by its name
         tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
@@ -426,7 +525,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             # Randomize seeds before starting the tournament
             challonge.participants.randomize(tournament['id'])
 
-            challonge.tournaments.start(tournament['id'])
+            challonge.tournaments.start(tournament['id'], subdomain=community_name)
             embed = discord.Embed(title="Division Started",
                                   description=f'Thandar Combat League {tournament["name"]} has started!',
                                   color=0x206694)
@@ -446,7 +545,10 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         :param context: The hybrid command context.
         :param division_name: The name of the division.
         """
-        tournaments = challonge.tournaments.index(state='all')
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "b5d0ca83e61253ea7f84a60c"
+
+        tournaments = challonge.tournaments.index(state='all', subdomain=community_name)
         tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
 
         if tournament is None:
@@ -456,7 +558,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             await context.send(embed=embed)
         else:
             # Finalize the tournament
-            challonge.tournaments.finalize(tournament['id'])
+            challonge.tournaments.finalize(tournament['id'], subdomain=community_name)
 
 
 async def setup(bot):

@@ -3,11 +3,8 @@ Use players challonge account for specific events instead of creating a nickname
 Fix bracket command to not be so janky.
 
 **Thandar Combat League:**
-Standings command - participants
-
 Create start command for league season (combines start division for all divisions) - TO
 Finalize season command (combines finalize division for all divisions) - TO
-
 Automate weekly announcements - AC13
 Promote/demote automation (auto assigns division roles?) - AC13
 
@@ -42,6 +39,7 @@ Top 4 invites - AC13
 Invitational stuff - AC13
 
 **Other stuff:**
+Register command that will pair HR IGN with discord.user to be used for checks when signing up for events.
 Add more roles for role checks.
 Add meme commands. (ala carl-bot)
 Alt-art commands. (ala carl-bot)
