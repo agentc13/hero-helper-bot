@@ -3,10 +3,11 @@ Use players challonge account for specific events instead of creating a nickname
 Fix bracket command to not be so janky.
 
 **Thandar Combat League:**
+Automate Division Roles when adding players to a division - AC13
 Create start command for league season (combines start division for all divisions) - TO
 Finalize season command (combines finalize division for all divisions) - TO
 Automate weekly announcements - AC13
-Promote/demote automation (auto assigns division roles?) - AC13
+Promote/demote automation - AC13
 
 **Quickfire:**
 Add checks when signing up that name matches IGN
