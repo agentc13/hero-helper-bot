@@ -212,29 +212,35 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         # Challonge community (subdomain) hosting the tournament
         community_name = "b5d0ca83e61253ea7f84a60c"
 
+        # Retrieve the list of tournaments from Challonge
         tournaments = challonge.tournaments.index(subdomain=community_name)
         tournament = None
+        # Search for a tournament that matches the provided division name
         for t in tournaments:
             if t['name'].lower() == division_name.lower():
                 tournament = t
                 break
 
         if tournament is None:
+            # If no matching tournament is found, send an error message
             embed = discord.Embed(
                 title='Error!',
                 description=f'Division "{division_name}" not found.',
                 colour=discord.Colour.dark_red(),
-                )
+            )
             await context.send(embed=embed)
             return
 
+        # Retrieve the matches for the selected tournament
         matches = challonge.matches.index(tournament["id"], subdomain=community_name)
 
+        # Dictionary to store player statistics
         players = {}
         for match in matches:
             player1_id = match['player1_id']
             player2_id = match['player2_id']
 
+            # Initialize player statistics if they don't exist in the dictionary
             if player1_id not in players:
                 players[player1_id] = {"wins": 0, "losses": 0, "match_wins": 0, "match_losses": 0}
             if player2_id not in players:
@@ -245,6 +251,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
                 player1_score = int(scores[0])
                 player2_score = int(scores[1])
 
+                # Update player statistics based on match results
                 players[player1_id]['wins'] += player1_score
                 players[player1_id]['losses'] += player2_score
                 players[player2_id]['wins'] += player2_score
@@ -260,8 +267,11 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
 
         standings = []
         for player_id, stats in players.items():
+            # Calculate win percentage for each player
             win_percentage = round(stats['wins'] / (stats['wins'] + stats['losses']) * 100, 2)
+            # Retrieve player information from Challonge
             player = challonge.participants.show(tournament["id"], player_id, subdomain=community_name)
+            # Append player statistics to the standings list
             standings.append({
                 "name": player['name'],
                 "wins": stats['wins'],
@@ -270,7 +280,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
                 "match_wins": stats['match_wins']
             })
 
-        # Sort by win_percentage, then match wins
+        # Sort the standings list based on win percentage and match wins in descending order
         standings.sort(key=operator.itemgetter('win_percentage', 'match_wins'), reverse=True)
 
         # Create the embed to be sent
@@ -280,12 +290,14 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             colour=discord.Colour.dark_green(),
         )
         for player in standings:
+            # Add a field to the embed for each player, displaying their statistics
             embed.add_field(
                 name=player['name'],
                 value=f"Wins: {player['wins']}\nLosses: {player['losses']}\nWin%: {player['win_percentage']}\nMatch Wins: {player['match_wins']}",
                 inline=False
             )
 
+        # Send the embed as a message in the Discord channel
         await context.send(embed=embed)
 
     # Start Tournament Organizer specific commands.
@@ -303,22 +315,34 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         :param context: The hybrid command context.
         :param user: The user that should be removed from the waitlist.
         """
+        # Retrieve the ID of the user to be removed from the waitlist
         user_id = user.id
+
+        # Check if the user is already signed up on the waitlist
         if not await db_manager.is_signed_up(user_id):
+            # User is not on the waitlist, send an error message
             embed = discord.Embed(
                 description=f"**{user.name}** is not on the waitlist.",
                 colour=discord.Colour.dark_red(),
             )
             await context.send(embed=embed)
             return
+
+        # Remove the user from the waitlist and get the updated total count
         total = await db_manager.remove_user_from_waitlist(user_id)
+
+        # Create an embedded message indicating successful removal
         embed = discord.Embed(
             description=f"**{user.name}** has been successfully removed from the waitlist.",
             colour=discord.Colour.dark_blue(),
         )
+
+        # Set the footer text based on the number of users remaining on the waitlist
         embed.set_footer(
             text=f"There {'is' if total == 1 else 'are'} now {total} {'user' if total == 1 else 'users'} on the waitlist."
         )
+
+        # Send the embedded message as a response in the Discord channel
         await context.send(embed=embed)
 
     @tcl.command(
@@ -336,15 +360,18 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         :param name: Name of division.
         """
         new_tournament_name = f'{name}'
-        unique_url = f"{name}{int(time.time())}".replace(" ", "")  # Create a unique URL
+        # Creates a unique url basedonthe tournament name and time
+        unique_url = f"{name}{int(time.time())}".replace(" ", "")
+        # Adds the tournament into Challonge.
         new_tournament = challonge.tournaments.create(new_tournament_name,
                                                       url=unique_url,
                                                       tournament_type="round robin",
                                                       game_name="Hero Realms Digital",
                                                       ranked_by="points scored",
-                                                      subdomain="b5d0ca83e61253ea7f84a60c",  # Hardcoded community subdomain
+                                                      subdomain="b5d0ca83e61253ea7f84a60c",
                                                       tie_breaks=["match wins", "game win percentage", "points scored"]
                                                       )
+        # Creates and sends an embed with the tournament info.
         embed = discord.Embed(
             title="Tournament Created",
             description=f"Name: {new_tournament_name}\nURL: {unique_url}\nGame: Hero Realms Digital",
@@ -411,12 +438,18 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         :param context: The hybrid command context.
         :param division_name: Name of the Thandar Combat League Division.
         """
+
         # Challonge community (subdomain) hosting the tournament
         community_name = "b5d0ca83e61253ea7f84a60c"
 
+        # Get a list of all tournaments in the Challonge community
         tournaments = challonge.tournaments.index(state='all', subdomain=community_name)
+
+        # Find the tournament that matches the provided division name
         tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
+
         if tournament is None:
+            # If the tournament is not found, display an error message
             embed = discord.Embed(
                 title='Error!',
                 description=f'Division "{division_name}" not found.',
@@ -424,9 +457,12 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             )
             await context.send(embed=embed)
         else:
+            # If the tournament is found, retrieve the list of participants
             participants = challonge.participants.index(tournament['id'])
             participant_names = [p['name'] for p in participants]
             participant_list = '\n'.join(participant_names)
+
+            # Create an embed message with the list of participants and send it
             embed = discord.Embed(
                 title=f'Participants in division "{division_name}"',
                 description=participant_list,
@@ -451,6 +487,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         participants = await db_manager.get_waitlist()
         participant_names = [p[1] for p in participants]
         participant_list = '\n'.join(participant_names)
+        # Creates and sends an embed showing the participants on the waitlist.
         embed = discord.Embed(
             title=f'Players signed up for Thandar Combat League',
             description=participant_list,
@@ -473,12 +510,18 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         :param division_name: Name of the tournament whose matches will be returned.
         :param max_round: The maximum round to display matches for.
         """
+
         # Challonge community (subdomain) hosting the tournament
         community_name = "b5d0ca83e61253ea7f84a60c"
 
+        # Get all tournaments from Challonge with the specified subdomain
         tournaments = challonge.tournaments.index(state='all', subdomain=community_name)
+
+        # Find the tournament with the specified division name
         tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
+
         if tournament is None:
+            # If the tournament is not found, display an error message
             embed = discord.Embed(
                 title='Error!',
                 description=f'Division "{division_name}" not found.',
@@ -486,36 +529,48 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             )
             await context.send(embed=embed)
         else:
+            # Get the matches for the tournament
             matches = challonge.matches.index(tournament['id'], state='open', subdomain=community_name)
+
+            # Get the participants for the tournament
             participants = challonge.participants.index(tournament['id'])
             participant_ids = {p['id']: p for p in participants}
+
             bracket = []
             for match in matches:
                 if match['round'] > max_round:
                     continue
+
+                # Get the names of the players for each match
                 if match['player1_id'] is not None and match['player2_id'] is not None:
                     p1_name = participant_ids[match['player1_id']]['name']
                     p2_name = participant_ids[match['player2_id']]['name']
                 else:
                     p1_name = "TBD"
                     p2_name = "TBD"
+
                 round_num = match.get('round', 'N/A')
                 bracket.append((match['id'], p1_name, p2_name, round_num))
+
+            # Create a formatted string representation of the bracket using the tabulate library
             bracket_str = tabulate(bracket, headers=["Match ID", "Player 1", "Player 2", "Round"])
 
+            # Create an embed to display the matches
             embed = discord.Embed(
                 title=division_name.title(),
                 description='Division Matches',
                 colour=discord.Colour.dark_gold(),
             )
+
+            # Add fields to the embed for each category (week, player 1, player 2)
             embed.add_field(name='Week', value='\n'.join([str(b[3]) for b in bracket]))
             embed.add_field(name='Player 1', value='\n'.join([b[1] for b in bracket]))
             embed.add_field(name='Player 2', value='\n'.join([b[2] for b in bracket]))
 
+            # Send the embed as a message
             await context.send(embed=embed)
 
-            # Define the start_division command, which allows a tournament organizer to start a round robin tournament for a division.
-
+    # Define the start_division command, which allows a tournament organizer to start a round robin tournament for a division.
     @tcl.command(
         base="tcl",
         name="start_division",
