@@ -24,7 +24,7 @@ class General(commands.Cog, name="General"):
             description="**All commands start with /**\n"
                         "Commands in a group will begin with the group prefix, then the specific command.\n\n"
                         "Tutorial videos can be found on [agentc13's YouTube channel](https://www.youtube.com/channel/UCUEuO2cFBlw5kh94ENUR0Ag).",
-            color=0x11806a
+            colour=discord.Colour.dark_purple(),
         )
 
         for cog in self.bot.cogs.values():
@@ -45,7 +45,7 @@ class General(commands.Cog, name="General"):
             if data:
                 help_text = "\n".join(data)
                 embed.add_field(
-                    name=cog.qualified_name, value=help_text, inline=False  # Removed the code block wrapper
+                    name=cog.qualified_name, value=help_text, inline=False
                 )
 
         await context.send(embed=embed)
@@ -63,7 +63,7 @@ class General(commands.Cog, name="General"):
         """
         embed = discord.Embed(
             description="Hero-Helper Discord Bot",
-            color=0x9C84EF,
+            colour=discord.Colour.dark_purple(),
         )
         embed.set_author(name="Bot Information")
         embed.add_field(name="Owner:", value="agentc13#8194", inline=True)
@@ -96,7 +96,9 @@ class General(commands.Cog, name="General"):
         roles = ", ".join(roles)
 
         embed = discord.Embed(
-            title="**Server Name:**", description=f"{context.guild}", color=0x9C84EF
+            title="**Server Name:**",
+            description=f"{context.guild}",
+            colour=discord.Colour.dark_purple(),
         )
         if context.guild.icon is not None:
             embed.set_thumbnail(url=context.guild.icon.url)
@@ -122,7 +124,7 @@ class General(commands.Cog, name="General"):
     #     """
     #     embed = discord.Embed(
     #         description=f"Invite me by clicking [here](https://discordapp.com/oauth2/authorize?&client_id={self.bot.config['application_id']}&scope=bot+applications.commands&permissions={self.bot.config['permissions']}).",
-    #         color=0xD75BF4,
+    #         colour = discord.Colour.dark_purple(),
     #     )
     #     try:
     #         await context.author.send(embed=embed)

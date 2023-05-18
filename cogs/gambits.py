@@ -52,7 +52,7 @@ class Gambits(commands.Cog, name="Gambits"):
         result = random.choice(roll_effect)
         embed = discord.Embed(
             description=f"{result}",
-            color=0x1f8b4c,
+            colour=discord.Colour.dark_blue(),
         )
         embed.set_author(name="Gambit Effect")
         await context.send(embed=embed)
@@ -66,7 +66,7 @@ class Gambits(commands.Cog, name="Gambits"):
         """Displays the entire Gambit Effect List."""
         embed = discord.Embed(
             description=f"{gambits}",
-            color=0x1f8b4c,
+            colour=discord.Colour.dark_blue(),
         )
         embed.set_author(name="Gambit Effect List")
         await context.send(embed=embed)
