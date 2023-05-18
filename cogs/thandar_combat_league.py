@@ -35,7 +35,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
                             "`signup` - Sign up for Thandar Combat League.\n"
                             "`report` - Report match results.\n"
                             "`standings` - Posts the current division standings.\n",
-                colour=discord.Colour.dark_red(),
+                colour=discord.Colour.dark_orange(),
             )
             await context.send(embed=embed)
 
@@ -178,7 +178,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         embed = discord.Embed(
             title="Match Reported",
             description=f'Match result has been reported. Winner: {winner_name}, Score: {games_won_by_winner}-{games_won_by_loser}',
-            colour=discord.Colour.dark_teal(),
+            colour=discord.Colour.dark_blue(),
             )
         await context.send(embed=embed)
 
@@ -299,7 +299,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         total = await db_manager.remove_user_from_waitlist(user_id)
         embed = discord.Embed(
             description=f"**{user.name}** has been successfully removed from the waitlist.",
-            colour=discord.Colour.dark_green(),
+            colour=discord.Colour.dark_blue(),
         )
         embed.set_footer(
             text=f"There {'is' if total == 1 else 'are'} now {total} {'user' if total == 1 else 'users'} on the waitlist."

@@ -42,7 +42,7 @@ class Quickfire(commands.Cog, name="Quickfire"):
                             "`bracket` - Posts screenshot of current Challonge bracket for a specified Quickfire tournament.\n"
                             "`report` - Allows user to report a match result for a specific Quickfire tournament.\n",
 
-                color=0x992d22,
+                colour=discord.Colour.dark_orange(),
             )
             await context.send(embed=embed)
 
@@ -61,9 +61,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
         """
         # check if the tournament_name includes 'quickfire'
         if 'quickfire' not in tournament_name:
-            embed = discord.Embed(title='Error!',
-                                  description=f'This command only works for Quickfire tournaments.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'This command only works for Quickfire tournaments.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
             return
 
@@ -73,9 +75,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
         # Find the tournament by its name
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
         if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'Tournament "{tournament_name}" not found.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'Tournament "{tournament_name}" not found.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             # If the tournament exists, check the number of participants
@@ -84,16 +88,20 @@ class Quickfire(commands.Cog, name="Quickfire"):
             if num_participants < 16:
                 # Check if the participant name already exists
                 if any(p['name'].lower() == participant_name.lower() for p in participants):
-                    embed = discord.Embed(title='Error!',
-                                          description=f'IGN "{participant_name}" is already signed up.',
-                                          color=0xe74c3c)
+                    embed = discord.Embed(
+                        title='Error!',
+                        description=f'IGN "{participant_name}" is already signed up.',
+                        colour=discord.Colour.dark_red(),
+                    )
                     await context.send(embed=embed)
                 else:
                     participant = challonge.participants.create(tournament['id'], participant_name)
                     num_participants += 1
-                    embed = discord.Embed(title="Participant Added",
-                                          description=f'Participant "{participant["name"]}" has been added to tournament "{tournament_name}"',
-                                          color=0x1f8b4c)
+                    embed = discord.Embed(
+                        title="Participant Added",
+                        description=f'Participant "{participant["name"]}" has been added to tournament "{tournament_name}"',
+                        colour=discord.Colour.dark_blue(),
+                    )
                     await context.send(embed=embed)
                     # Gives user the Quickfire Role
                     role = discord.utils.get(context.guild.roles, id=1104624377313624066)
@@ -107,9 +115,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
                     new_tournament = challonge.tournaments.create(new_tournament_name,
                                                                   url=unique_url,
                                                                   game_name="Hero Realms Digital")  # Add url=unique_url parameter
-                    embed = discord.Embed(title="Tournament Created",
-                                          description=f'Tournament "{new_tournament_name}" has started! A new tournament "{new_tournament_name}" has been created.',
-                                          color=0xc27c0e)
+                    embed = discord.Embed(
+                        title="Tournament Created",
+                        description=f'Tournament "{new_tournament_name}" has started! A new tournament "{new_tournament_name}" has been created.',
+                        colour=discord.Colour.dark_gold(),
+                    )
                     await context.send(embed=embed)
 
     # Define the show_participants command, which allows a tournament organizer to view the list of participants in a tournament
@@ -126,26 +136,32 @@ class Quickfire(commands.Cog, name="Quickfire"):
         """
         # check if the tournament_name includes 'quickfire'
         if 'quickfire' not in tournament_name:
-            embed = discord.Embed(title='Error!',
-                                  description=f'This command only works for Quickfire tournaments.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'This command only works for Quickfire tournaments.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
             return
 
         tournaments = challonge.tournaments.index(state='all')
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
         if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'Tournament "{tournament_name}" not found.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'Tournament "{tournament_name}" not found.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             participants = challonge.participants.index(tournament['id'])
             participant_names = [p['name'] for p in participants]
             participant_list = '\n'.join(participant_names)
-            embed = discord.Embed(title=f'Participants in tournament "{tournament_name}"',
-                                  description=participant_list,
-                                  color=0x992d22)
+            embed = discord.Embed(
+                title=f'Participants in tournament "{tournament_name}"',
+                description=participant_list,
+                colour=discord.Colour.dark_magenta(),
+            )
             await context.send(embed=embed)
 
     # Define the show_matches command, which returns a list of matches for a tournament
@@ -162,18 +178,22 @@ class Quickfire(commands.Cog, name="Quickfire"):
         """
         # check if the tournament_name includes 'quickfire'
         if 'quickfire' not in tournament_name:
-            embed = discord.Embed(title='Error!',
-                                  description=f'This command only works for Quickfire tournaments.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'This command only works for Quickfire tournaments.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
             return
 
         tournaments = challonge.tournaments.index(state='in progress')
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
         if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'Tournament "{tournament_name}" not found.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'Tournament "{tournament_name}" not found.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             matches = challonge.matches.index(tournament['id'], state='open')
@@ -191,7 +211,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
                 bracket.append((match['id'], p1_name, p2_name, round_num))
             bracket_str = tabulate(bracket, headers=["Match ID", "Player 1", "Player 2", "Round"])
     
-            embed = discord.Embed(title=tournament_name, description='Tournament Bracket', color=0x206694)
+            embed = discord.Embed(
+                title=tournament_name,
+                description='Tournament Bracket',
+                colour=discord.Colour.dark_green(),
+            )
             embed.add_field(name='Round', value='\n'.join([str(b[3]) for b in bracket]))
             embed.add_field(name='Player 1', value='\n'.join([b[1] for b in bracket]))
             embed.add_field(name='Player 2', value='\n'.join([b[2] for b in bracket]))
@@ -211,9 +235,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
         """
         # check if the tournament_name includes 'quickfire'
         if 'quickfire' not in tournament_name:
-            embed = discord.Embed(title='Error!',
-                                  description=f'This command only works for Quickfire tournaments.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'This command only works for Quickfire tournaments.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
             return
 
@@ -230,7 +256,7 @@ class Quickfire(commands.Cog, name="Quickfire"):
             embed = discord.Embed(
                 title=f'Tournament Bracket for "{tournament_name}"',
                 description=f'[View the bracket here]({tournament_url})',
-                color=0x71368a
+                colour=discord.Colour.dark_gold(),
             )
             await context.send(embed=embed)
 
@@ -247,9 +273,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
         """
         # check if the tournament_name includes 'quickfire'
         if 'quickfire' not in tournament_name:
-            embed = discord.Embed(title='Error!',
-                                  description=f'This command only works for Quickfire tournaments.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'This command only works for Quickfire tournaments.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
             return
 
@@ -257,9 +285,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
 
         if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'Tournament "{tournament_name}" not found.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'Tournament "{tournament_name}" not found.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             # Get the tournament URL
@@ -289,16 +319,21 @@ class Quickfire(commands.Cog, name="Quickfire"):
                     temp_file.flush()
                     embed = discord.Embed(
                         title=f'Tournament Bracket for "{tournament_name}"',
-                        color=0x71368a
+                        colour=discord.Colour.dark_gold(),
                     )
-                    await context.send(embed=embed, file=discord.File(temp_file.name, filename="bracket.png"))
+                    await context.send(
+                        embed=embed,
+                        file=discord.File(temp_file.name,
+                                          filename="bracket.png"))
                     os.unlink(temp_file.name)
 
             except Exception as e:
                 driver.quit()
-                embed = discord.Embed(title='Error!',
-                                      description='Failed to capture the bracket image.',
-                                      color=0xe74c3c)
+                embed = discord.Embed(
+                    title='Error!',
+                    description='Failed to capture the bracket image.',
+                    colour=discord.Colour.dark_red(),
+                )
                 await context.send(embed=embed)
 
     # Define the show_tournaments command, which lists all current tournaments and their status
@@ -313,9 +348,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
         :param context: The hybrid command context.
         """
         tournaments = challonge.tournaments.index(state='all')
-        embed = discord.Embed(title='Quickfire Tournament List',
-                              description='All currently in progress or pending Quickfire tournaments.',
-                              color=0xa84300)
+        embed = discord.Embed(
+            title='Quickfire Tournament List',
+            description='All currently in progress or pending Quickfire tournaments.',
+            colour=discord.Colour.dark_green(),
+        )
         for tournament in tournaments:
             if 'quickfire' in tournament['name'].lower() and tournament['state'] != 'complete':
                 embed.add_field(name=tournament['name'],
@@ -339,9 +376,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
         """
         # check if the tournament_name includes 'quickfire'
         if 'quickfire' not in tournament_name:
-            embed = discord.Embed(title='Error!',
-                                  description=f'This command only works for Quickfire tournaments.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'This command only works for Quickfire tournaments.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
             return
 
@@ -357,7 +396,8 @@ class Quickfire(commands.Cog, name="Quickfire"):
             embed = discord.Embed(
                 title="Error",
                 description=f'Tournament "{tournament_name}" not found',
-                color=0xe74c3c)
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             # Fetch all open matches in the tournament
@@ -387,7 +427,8 @@ class Quickfire(commands.Cog, name="Quickfire"):
                 embed = discord.Embed(
                     title="Error",
                     description=f'Match in round {round_number} not found or already completed in tournament "{tournament_name}"',
-                    color=0xe74c3c)
+                    colour=discord.Colour.dark_red(),
+                )
                 await context.send(embed=embed)
             else:
                 # If the winner is not found in the list of participants, send an error message
@@ -395,7 +436,8 @@ class Quickfire(commands.Cog, name="Quickfire"):
                     embed = discord.Embed(
                         title="Error",
                         description=f'Winner "{winner}" not found in the list of participants',
-                        color=0xe74c3c)
+                        colour=discord.Colour.dark_red(),
+                    )
                     await context.send(embed=embed)
                     return
 
@@ -404,7 +446,8 @@ class Quickfire(commands.Cog, name="Quickfire"):
                     embed = discord.Embed(
                         title='Error',
                         description=f'Winner "{winner}" is not a player in the match of round {round_number}',
-                        color=0xe74c3c)
+                        colour=discord.Colour.dark_red(),
+                    )
                     await context.send(embed=embed)
                 else:
                     # Determine the score (1-0) for the winner
@@ -420,7 +463,7 @@ class Quickfire(commands.Cog, name="Quickfire"):
                     embed = discord.Embed(
                         title='Match Reported',
                         description=f'Match result reported for match in round {round_number} in tournament "{tournament_name}. {original_winner_name} won 1-0',
-                        color=0x71368a
+                        colour=discord.Colour.dark_blue(),
                     )
                     await context.send(embed=embed)
 
@@ -440,7 +483,7 @@ class Quickfire(commands.Cog, name="Quickfire"):
                             embed = discord.Embed(
                                 title=f'Tournament "{tournament_name}" is complete!',
                                 description=f'Congratulations to the winner: {original_winner_name}\n\n{announcement_role.mention}, please take note.',
-                                color=0x1f8b4c
+                                colour=discord.Colour.dark_gold(),
                             )
                             await context.send(embed=embed)
 
@@ -461,9 +504,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
         """
         # check if the tournament_name includes 'quickfire'
         if 'quickfire' not in tournament_name:
-            embed = discord.Embed(title='Error!',
-                                  description=f'This command only works for Quickfire tournaments.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'This command only works for Quickfire tournaments.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
             return
 
@@ -474,9 +519,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
 
         if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'Tournament "{tournament_name}" not found.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'Tournament "{tournament_name}" not found.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             # Check the number of participants
@@ -484,14 +531,18 @@ class Quickfire(commands.Cog, name="Quickfire"):
             if num_participants < 16:
                 # If the tournament exists, add player to tournament.
                 participant = challonge.participants.create(tournament['id'], player_name)
-                embed = discord.Embed(title="Participant Added",
-                                      description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
-                                      color=0x1f8b4c)
+                embed = discord.Embed(
+                    title="Participant Added",
+                    description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
+                    colour=discord.Colour.dark_red(),
+                )
                 await context.send(embed=embed)
             else:
-                embed = discord.Embed(title="Tournament Full",
-                                      description=f'The tournament "{tournament_name}" is full with {num_participants} participants',
-                                      color=0xa84300)
+                embed = discord.Embed(
+                    title="Tournament Full",
+                    description=f'The tournament "{tournament_name}" is full with {num_participants} participants',
+                    colour=discord.Colour.dark_red(),
+                )
                 await context.send(embed=embed)
 
             # Check the number of participants to see if we are at 16 after adding the player.
@@ -516,7 +567,7 @@ class Quickfire(commands.Cog, name="Quickfire"):
                 embed = discord.Embed(
                     title='Full Tournament',
                     description=f'Tournament "{tournament_name}" has started! A new tournament "{new_tournament_name}" has been created.',
-                    color=0xe67e22
+                    colour=discord.Colour.dark_gold(),
                 )
                 await context.send(embed=embed)
 
