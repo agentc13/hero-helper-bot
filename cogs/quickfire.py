@@ -508,13 +508,16 @@ class Quickfire(commands.Cog, name="Quickfire"):
                 # Replace the old number in the tournament_name with the new number
                 new_tournament_name = tournament_name.replace(str(old_number), str(new_number))
 
-                unique_url = f"{tournament_name}{int(time.time())}"  # Add this line to create a unique URL
+                # This creates a unique URL using the tournament name and time it was created.
+                unique_url = f"{tournament_name}{int(time.time())}"
                 new_tournament = challonge.tournaments.create(new_tournament_name,
                                                               url=unique_url,
-                                                              game_name="Hero Realms Digital")  # Add url=unique_url parameter
-                embed = discord.Embed(title='Full Tournament',
-                                      description=f'Tournament "{tournament_name}" has started! A new tournament "{new_tournament_name}" has been created.',
-                                      color=0xe67e22)
+                                                              game_name="Hero Realms Digital")
+                embed = discord.Embed(
+                    title='Full Tournament',
+                    description=f'Tournament "{tournament_name}" has started! A new tournament "{new_tournament_name}" has been created.',
+                    color=0xe67e22
+                )
                 await context.send(embed=embed)
 
 
