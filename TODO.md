@@ -1,6 +1,5 @@
 **CHALLONGE:**
 Use players challonge account for specific events instead of creating a nickname in Challonge.
-Fix bracket command to not be so janky.
 
 **Thandar Combat League:**
 Automate Division Roles when adding players to a division - AC13
