@@ -34,7 +34,7 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
                             "`remove_tournament` - Deletes a tournament from Challonge.\n"
                             "`start_tournament` - Starts a specific tournament in Challonge.\n"
                             "`add_player` - Allows a Tournament Organizer to manually add a player to a tournament.\n",
-                color=0x992d22,
+                colour=discord.Colour.dark_orange(),
             )
             await context.send(embed=embed)
 
@@ -80,9 +80,11 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
                                                       url=unique_url,
                                                       tournament_type=tournament_type,
                                                       game_name="Hero Realms Digital")
-        embed = discord.Embed(title="Tournament Created",
-                              description=f"Name: {new_tournament_name}\nURL: {unique_url}\nGame: Hero Realms Digital",
-                              color=0xc27c0e)
+        embed = discord.Embed(
+            title="Tournament Created",
+            description=f"Name: {new_tournament_name}\nURL: {unique_url}\nGame: Hero Realms Digital",
+            colour=discord.Colour.dark_green(),
+        )
         await context.send(embed=embed)
         await context.send(
             f'{announcement_role.mention} Sign ups for  "{new_tournament_name}" are open! Use the "/{group} signup {new_tournament_name}" command to join!')
@@ -103,15 +105,19 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
         tournaments = challonge.tournaments.index(state='all')
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
         if tournament is None:
-            embed = discord.Embed(title='Error',
-                                  description=f'Tournament "{tournament_name}" not found',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error',
+                description=f'Tournament "{tournament_name}" not found',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             challonge.tournaments.destroy(tournament['id'])
-            embed = discord.Embed(title='Tournament Removed',
-                                  description=f'{tournament["name"]} has been removed from active tournaments.',
-                                  color=0xc27c0e)
+            embed = discord.Embed(
+                title='Tournament Removed',
+                description=f'{tournament["name"]} has been removed from active tournaments.',
+                colour=discord.Colour.dark_blue(),
+            )
             await context.send(embed=embed)
 
     # Define the start_tournament command, which allows a tournament organizer to start a tournament
@@ -153,18 +159,22 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
 
         if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'Tournament "{tournament_name}" not found.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'Tournament "{tournament_name}" not found.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             # Randomize seeds before starting the tournament
             challonge.participants.randomize(tournament['id'])
 
             challonge.tournaments.start(tournament['id'])
-            embed = discord.Embed(title="Tournament Started",
-                                  description=f'{announcement_role.mention}, {tournament["name"]} has been started',
-                                  color=0x206694)
+            embed = discord.Embed(
+                title="Tournament Started",
+                description=f'{announcement_role.mention}, {tournament["name"]} has been started',
+                colour=discord.Colour.dark_gold(),
+            )
             await context.send(embed=embed)
 
     @to.command(
@@ -183,16 +193,20 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
 
         if tournament is None:
-            embed = discord.Embed(title='Error',
-                                  description=f'Tournament "{tournament_name}" not found',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error',
+                description=f'Tournament "{tournament_name}" not found',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             # Reset the tournament
             challonge.tournaments.reset(tournament['id'])
-            embed = discord.Embed(title='Tournament Reset',
-                                  description=f'{tournament_name} has been reset.',
-                                  color=0xc27c0e)
+            embed = discord.Embed(
+                title='Tournament Reset',
+                description=f'{tournament_name} has been reset.',
+                colour=discord.Colour.dark_blue(),
+            )
             await context.send(embed=embed)
 
     @to.command(
@@ -215,16 +229,20 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
 
         if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'Tournament "{tournament_name}" not found.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'Tournament "{tournament_name}" not found.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             # If the tournament exists, add the participant.
             participant = challonge.participants.create(tournament['id'], player_name)
-            embed = discord.Embed(title="Participant Added",
-                                  description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
-                                  color=0x1f8b4c)
+            embed = discord.Embed(
+                title="Participant Added",
+                description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
+                colour=discord.Colour.dark_green(),
+            )
             await context.send(embed=embed)
 
     @to.command(
@@ -244,9 +262,11 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
 
         if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'Tournament "{tournament_name}" not found.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'Tournament "{tournament_name}" not found.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             # Get participants
@@ -256,17 +276,21 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
             player_participant = next((p for p in participants if p["name"].lower() == name.lower()), None)
 
             if player_participant is None:
-                embed = discord.Embed(title='Error!',
-                                      description=f'Player "{name}" not found in the list of participants.',
-                                      color=0xe74c3c)
+                embed = discord.Embed(
+                    title='Error!',
+                    description=f'Player "{name}" not found in the list of participants.',
+                    colour=discord.Colour.dark_red(),
+                )
                 await context.send(embed=embed)
             else:
                 # Remove the player from the tournament
                 challonge.participants.destroy(tournament['id'], player_participant['id'])
                 await context.send(f'Player "{name}" has been removed from tournament "{tournament_name}"')
-                embed = discord.Embed(title='Removed.',
-                                      description=f'Player "{name}" has been removed from {tournament_name}.',
-                                      color=0x71368a)
+                embed = discord.Embed(
+                    title='Removed.',
+                    description=f'Player "{name}" has been removed from {tournament_name}.',
+                    colour=discord.Colour.dark_green(),
+                )
                 await context.send(embed=embed)
 
     @to.command(
@@ -304,9 +328,11 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
 
         if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'Tournament "{tournament_name}" not found.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'Tournament "{tournament_name}" not found.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             # Finalize the tournament
@@ -327,13 +353,15 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
                 embed = discord.Embed(
                     title=f'Tournament "{tournament_name}" is complete!',
                     description=f'Congratulations to the winner: {winner_participant["name"]}\n{announcement_role.mention}',
-                    color=0x71368a
+                    colour=discord.Colour.dark_gold(),
                 )
                 await context.send(embed=embed)
             else:
-                embed = discord.Embed(title='Error!',
-                                      description=f'Tournament "{tournament_name}" cannot be finalized.',
-                                      color=0xe74c3c)
+                embed = discord.Embed(
+                    title='Error!',
+                    description=f'Tournament "{tournament_name}" cannot be finalized.',
+                    colour=discord.Colour.dark_red(),
+                )
                 await context.send(embed=embed)
 
 
