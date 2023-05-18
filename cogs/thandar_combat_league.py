@@ -41,6 +41,8 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
 
     # This code defines a command named "signup" in a discord bot for signing up for the Thandar Combat League.
 
+    # This code defines a command named "signup" in a discord bot for signing up for the Thandar Combat League.
+
     @tcl.command(
         name="signup",
         description="Sign up for Thandar Combat League.",
@@ -51,6 +53,19 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         :param context: The hybrid command context.
         :param hr_ign: Your Hero Realms In Game Name.
         """
+        # Get the user ID of the author who triggered the command.
+        user_id = context.author.id
+
+        # Check if the user is already signed up.
+        if await db_manager.is_signed_up(user_id):
+            # If the user is already signed up, create an embed message indicating that.
+            embed = discord.Embed(
+                title="Error!",
+                description=f"**{context.author.mention}** is already on waitlist.",
+                colour=discord.Colour.dark_red(),
+            )
+            await context.send(embed=embed)
+            return
 
         # Create an embed message with information about being added to the waitlist.
         embed = discord.Embed(
@@ -63,24 +78,12 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             # Send the embed message to the user who triggered the command.
             await context.author.send(embed=embed)
 
-            # Get the user ID of the author who triggered the command.
-            user_id = context.author.id
-
-            # Check if the user is already signed up.
-            if await db_manager.is_signed_up(user_id):
-                # If the user is already signed up, create an embed message indicating that.
-                embed = discord.Embed(
-                    description=f"**{context.author.mention}** is already on waitlist.",
-                    colour=discord.Colour.dark_red(),
-                )
-                await context.send(embed=embed)
-                return
-
             # Add the user to the waitlist and get the total number of users on the waitlist.
             total = await db_manager.add_user_to_waitlist(user_id, hr_ign)
 
             # Create an embed message indicating that the user has been successfully added to the waitlist.
             embed = discord.Embed(
+                title="Success!",
                 description=f"**{context.author.mention}** has been successfully added to the waitlist.",
                 colour=discord.Colour.dark_blue(),
             )
