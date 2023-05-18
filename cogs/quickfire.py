@@ -1,6 +1,7 @@
 import challonge
 import discord
 import time
+import re
 from discord.ext import commands
 from discord.ext.commands import Context
 from tabulate import tabulate
@@ -60,7 +61,7 @@ class Quickfire(commands.Cog, name="Quickfire"):
         :param participant_name: Hero Realms IGN.
         """
         # check if the tournament_name includes 'quickfire'
-        if 'quickfire' not in tournament_name:
+        if 'quickfire'.lower() not in tournament_name.lower():
             embed = discord.Embed(
                 title='Error!',
                 description=f'This command only works for Quickfire tournaments.',
@@ -107,17 +108,32 @@ class Quickfire(commands.Cog, name="Quickfire"):
                     role = discord.utils.get(context.guild.roles, id=1104624377313624066)
                     if role is not None:
                         await context.author.add_roles(role)
+
+                # Check the number of participants to see if we are at 16 after adding the player.
+                num_participants = len(challonge.participants.index(tournament['id']))
                 if num_participants == 16:
-                    # Start the tournament and create a new tournament with the same name
+                    # Start the tournament and create a new tournament with the same name but new number at the end.
+                    challonge.participants.randomize(tournament['id'])
                     challonge.tournaments.start(tournament['id'])
-                    new_tournament_name = f'{tournament_name}{len(tournaments) + 1}'
-                    unique_url = f"{tournament_name}{int(time.time())}"  # Add this line to create a unique URL
+
+                    # Extract old tournament number and increment it by 1 for the new tournament
+                    old_number = int(''.join(filter(str.isdigit, tournament_name)))
+                    new_number = old_number + 1
+
+                    # Replace the old number in the tournament_name with the new number
+                    new_tournament_name = tournament_name.replace(str(old_number), str(new_number))
+
+                    # Remove all characters except letters, numbers, and underscores
+                    sanitized_tournament_name = re.sub(r'[^a-zA-Z0-9_]', '', tournament_name)
+
+                    # Generate the unique URL using the sanitized tournament name and current timestamp
+                    unique_url = f"{sanitized_tournament_name}{int(time.time())}"
                     new_tournament = challonge.tournaments.create(new_tournament_name,
                                                                   url=unique_url,
-                                                                  game_name="Hero Realms Digital")  # Add url=unique_url parameter
+                                                                  game_name="Hero Realms Digital")
                     embed = discord.Embed(
-                        title="Tournament Created",
-                        description=f'Tournament "{new_tournament_name}" has started! A new tournament "{new_tournament_name}" has been created.',
+                        title='Full Tournament',
+                        description=f'Tournament "{tournament_name}" has started! A new tournament "{new_tournament_name}" has been created.',
                         colour=discord.Colour.dark_gold(),
                     )
                     await context.send(embed=embed)
@@ -308,6 +324,9 @@ class Quickfire(commands.Cog, name="Quickfire"):
             try:
                 # Navigate to the tournament URL
                 driver.get(tournament_url)
+
+                # Set the window size
+                driver.set_window_size(1920, 1080)
 
                 # Take a screenshot of the bracket
                 screenshot = driver.get_screenshot_as_png()
@@ -559,8 +578,11 @@ class Quickfire(commands.Cog, name="Quickfire"):
                 # Replace the old number in the tournament_name with the new number
                 new_tournament_name = tournament_name.replace(str(old_number), str(new_number))
 
-                # This creates a unique URL using the tournament name and time it was created.
-                unique_url = f"{tournament_name}{int(time.time())}"
+                # Remove all characters except letters, numbers, and underscores
+                sanitized_tournament_name = re.sub(r'[^a-zA-Z0-9_]', '', tournament_name)
+
+                # Generate the unique URL using the sanitized tournament name and current timestamp
+                unique_url = f"{sanitized_tournament_name}{int(time.time())}"
                 new_tournament = challonge.tournaments.create(new_tournament_name,
                                                               url=unique_url,
                                                               game_name="Hero Realms Digital")
