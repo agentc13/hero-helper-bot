@@ -10,7 +10,6 @@ Automate weekly announcements - AC13
 Promote/demote automation - AC13
 
 **Quickfire:**
-Add checks when signing up that name matches IGN
 
 **SRDO:**
 Tournament signup command - participants

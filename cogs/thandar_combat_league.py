@@ -59,14 +59,14 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             user_id = context.author.id
             if await db_manager.is_signed_up(user_id):
                 embed = discord.Embed(
-                    description=f"**{context.author}** is already on waitlist.",
+                    description=f"**{context.author.mention}** is already on waitlist.",
                     colour=discord.Colour.dark_red(),
                 )
                 await context.send(embed=embed)
                 return
             total = await db_manager.add_user_to_waitlist(user_id, hr_ign)
             embed = discord.Embed(
-                description=f"**{context.author}** has been successfully added to the waitlist.",
+                description=f"**{context.author.mention}** has been successfully added to the waitlist.",
                 colour=discord.Colour.dark_blue(),
             )
             embed.set_footer(
