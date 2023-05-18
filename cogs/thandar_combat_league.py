@@ -35,7 +35,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
                             "`signup` - Sign up for Thandar Combat League.\n"
                             "`report` - Report match results.\n"
                             "`standings` - Posts the current division standings.\n",
-                color=0x992d22,
+                colour=discord.Colour.dark_red(),
             )
             await context.send(embed=embed)
 
@@ -58,7 +58,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             # If the user is already signed up, create an embed message indicating that
             embed = discord.Embed(
                 description=f"**{context.author}** is already on waitlist.",
-                colour=discord.Colour.red(),
+                colour=discord.Colour.dark_red(),
             )
             await context.send(embed=embed)
             return
@@ -69,7 +69,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         # Create an embed message indicating successful signup
         embed = discord.Embed(
             description=f"**{context.author}** has been successfully added to the waitlist.",
-            colour=discord.Colour.red(),
+            colour=discord.Colour.dark_red(),
         )
         embed.set_footer(
             text=f"There {'is' if total == 1 else 'are'} now {total} {'user' if total == 1 else 'users'} in "
@@ -110,7 +110,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             embed = discord.Embed(
                 title='Error!',
                 description='Winner score is incorrect. It must be 2 or 3.',
-                colour=discord.Colour.red(),
+                colour=discord.Colour.dark_red(),
             )
             await context.send(embed=embed)
             return
@@ -126,7 +126,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             embed = discord.Embed(
                 title='Error!',
                 description=f'Division "{division_name}" not found.',
-                colour=discord.Colour.red(),
+                colour=discord.Colour.dark_red(),
                 )
             await context.send(embed=embed)
             return
@@ -142,7 +142,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             embed = discord.Embed(
                 title='Error!',
                 description=f'Participant "{winner_name}" not found.',
-                colour=discord.Colour.red(),
+                colour=discord.Colour.dark_red(),
             )
             await context.send(embed=embed)
             return
@@ -159,7 +159,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             embed = discord.Embed(
                 title='Error!',
                 description=f'Match for round "{round_number}" not found or match already closed.',
-                colour=discord.Colour.red(),
+                colour=discord.Colour.dark_red(),
             )
             await context.send(embed=embed)
             return
@@ -208,7 +208,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             embed = discord.Embed(
                 title='Error!',
                 description=f'Division "{division_name}" not found.',
-                colour=discord.Colour.red(),
+                colour=discord.Colour.dark_red(),
                 )
             await context.send(embed=embed)
             return
@@ -262,7 +262,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         embed = discord.Embed(
             title=f"Division: {tournament['name'].title()}",
             description="Player Statistics",
-            colour=discord.Colour.green(),
+            colour=discord.Colour.dark_green(),
         )
         for player in standings:
             embed.add_field(
@@ -291,14 +291,15 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         user_id = user.id
         if not await db_manager.is_signed_up(user_id):
             embed = discord.Embed(
-                description=f"**{user.name}** is not on the waitlist.", color=0x992d22
+                description=f"**{user.name}** is not on the waitlist.",
+                colour=discord.Colour.dark_red(),
             )
             await context.send(embed=embed)
             return
         total = await db_manager.remove_user_from_waitlist(user_id)
         embed = discord.Embed(
             description=f"**{user.name}** has been successfully removed from the waitlist.",
-            color=0x992d22,
+            colour=discord.Colour.dark_green(),
         )
         embed.set_footer(
             text=f"There {'is' if total == 1 else 'are'} now {total} {'user' if total == 1 else 'users'} on the waitlist."
@@ -329,9 +330,11 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
                                                       subdomain="b5d0ca83e61253ea7f84a60c",  # Hardcoded community subdomain
                                                       tie_breaks=["match wins", "game win percentage", "points scored"]
                                                       )
-        embed = discord.Embed(title="Tournament Created",
-                              description=f"Name: {new_tournament_name}\nURL: {unique_url}\nGame: Hero Realms Digital",
-                              color=0xc27c0e)
+        embed = discord.Embed(
+            title="Tournament Created",
+            description=f"Name: {new_tournament_name}\nURL: {unique_url}\nGame: Hero Realms Digital",
+            colour=discord.Colour.dark_gold(),
+        )
         await context.send(embed=embed)
 
     # Tournament Organizer command to add players into a specified division.
@@ -360,9 +363,11 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
 
         if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'Tournament "{division_name}" not found.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'Tournament "{division_name}" not found.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             # If the tournament exists, add the participants.
@@ -370,9 +375,11 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
 
             for hr_ign in hr_igns_list:
                 participant = challonge.participants.create(tournament['id'], hr_ign, subdomain=community_name)
-                embed = discord.Embed(title="Participant Added",
-                                      description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
-                                      color=0x1f8b4c)
+                embed = discord.Embed(
+                    title="Participant Added",
+                    description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
+                    colour=discord.Colour.dark_blue(),
+                )
                 await context.send(embed=embed)
 
     @tcl.command(
@@ -395,17 +402,21 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         tournaments = challonge.tournaments.index(state='all', subdomain=community_name)
         tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
         if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'Division "{division_name}" not found.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'Division "{division_name}" not found.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             participants = challonge.participants.index(tournament['id'])
             participant_names = [p['name'] for p in participants]
             participant_list = '\n'.join(participant_names)
-            embed = discord.Embed(title=f'Participants in division "{division_name}"',
-                                  description=participant_list,
-                                  color=0x992d22)
+            embed = discord.Embed(
+                title=f'Participants in division "{division_name}"',
+                description=participant_list,
+                colour=discord.Colour.dark_magenta(),
+            )
             await context.send(embed=embed)
 
     @tcl.command(
@@ -425,9 +436,11 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         participants = await db_manager.get_waitlist()
         participant_names = [p[1] for p in participants]
         participant_list = '\n'.join(participant_names)
-        embed = discord.Embed(title=f'Players signed up for Thandar Combat League',
-                              description=participant_list,
-                              color=0x992d22)
+        embed = discord.Embed(
+            title=f'Players signed up for Thandar Combat League',
+            description=participant_list,
+            colour=discord.Colour.dark_green(),
+        )
         await context.send(embed=embed)
 
     @tcl.command(
@@ -454,7 +467,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             embed = discord.Embed(
                 title='Error!',
                 description=f'Division "{division_name}" not found.',
-                color=0xe74c3c
+                colour=discord.Colour.dark_red(),
             )
             await context.send(embed=embed)
         else:
@@ -475,7 +488,11 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
                 bracket.append((match['id'], p1_name, p2_name, round_num))
             bracket_str = tabulate(bracket, headers=["Match ID", "Player 1", "Player 2", "Round"])
 
-            embed = discord.Embed(title=division_name.title(), description='Division Matches', color=0x206694)
+            embed = discord.Embed(
+                title=division_name.title(),
+                description='Division Matches',
+                colour=discord.Colour.dark_gold(),
+            )
             embed.add_field(name='Week', value='\n'.join([str(b[3]) for b in bracket]))
             embed.add_field(name='Player 1', value='\n'.join([b[1] for b in bracket]))
             embed.add_field(name='Player 2', value='\n'.join([b[2] for b in bracket]))
@@ -508,18 +525,22 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
 
         if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'Division "{division_name}" not found.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'Division "{division_name}" not found.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             # Randomize seeds before starting the tournament
             challonge.participants.randomize(tournament['id'])
 
             challonge.tournaments.start(tournament['id'], subdomain=community_name)
-            embed = discord.Embed(title="Division Started",
-                                  description=f'Thandar Combat League {tournament["name"]} has started!',
-                                  color=0x206694)
+            embed = discord.Embed(
+                title="Division Started",
+                description=f'Thandar Combat League {tournament["name"]} has started!',
+                colour=discord.Colour.dark_blue(),
+            )
             await context.send(embed=embed)
 
     @tcl.command(
@@ -543,9 +564,11 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         tournament = next((t for t in tournaments if t['name'].lower() == division_name.lower()), None)
 
         if tournament is None:
-            embed = discord.Embed(title='Error!',
-                                  description=f'TDivision "{division_name}" not found.',
-                                  color=0xe74c3c)
+            embed = discord.Embed(
+                title='Error!',
+                description=f'TDivision "{division_name}" not found.',
+                colour=discord.Colour.dark_red(),
+            )
             await context.send(embed=embed)
         else:
             # Finalize the tournament
