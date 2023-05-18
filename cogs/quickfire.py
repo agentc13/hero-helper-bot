@@ -151,7 +151,7 @@ class Quickfire(commands.Cog, name="Quickfire"):
         :param tournament_name: Tournament name.
         """
         # check if the tournament_name includes 'quickfire'
-        if 'quickfire' not in tournament_name:
+        if 'quickfire'.lower() not in tournament_name.lower():
             embed = discord.Embed(
                 title='Error!',
                 description=f'This command only works for Quickfire tournaments.',
@@ -193,7 +193,7 @@ class Quickfire(commands.Cog, name="Quickfire"):
         :param tournament_name: Name of tournament whose matches will be returned.
         """
         # check if the tournament_name includes 'quickfire'
-        if 'quickfire' not in tournament_name:
+        if 'quickfire'.lower() not in tournament_name.lower():
             embed = discord.Embed(
                 title='Error!',
                 description=f'This command only works for Quickfire tournaments.',
@@ -250,7 +250,7 @@ class Quickfire(commands.Cog, name="Quickfire"):
         :param tournament_name: Tournament name.
         """
         # check if the tournament_name includes 'quickfire'
-        if 'quickfire' not in tournament_name:
+        if 'quickfire'.lower() not in tournament_name.lower():
             embed = discord.Embed(
                 title='Error!',
                 description=f'This command only works for Quickfire tournaments.',
@@ -258,7 +258,6 @@ class Quickfire(commands.Cog, name="Quickfire"):
             )
             await context.send(embed=embed)
             return
-
         tournaments = challonge.tournaments.index(state='in progress')
         tournament = next((t for t in tournaments if t['name'].lower() == tournament_name.lower()), None)
 
@@ -287,8 +286,10 @@ class Quickfire(commands.Cog, name="Quickfire"):
         :param context: The command context.
         :param tournament_name: Tournament name.
         """
+        # Defer the command response
+        await context.defer()
         # check if the tournament_name includes 'quickfire'
-        if 'quickfire' not in tournament_name:
+        if 'quickfire'.lower() not in tournament_name.lower():
             embed = discord.Embed(
                 title='Error!',
                 description=f'This command only works for Quickfire tournaments.',
@@ -394,7 +395,7 @@ class Quickfire(commands.Cog, name="Quickfire"):
         :param winner: Name of the winner.
         """
         # check if the tournament_name includes 'quickfire'
-        if 'quickfire' not in tournament_name:
+        if 'quickfire'.lower() not in tournament_name.lower():
             embed = discord.Embed(
                 title='Error!',
                 description=f'This command only works for Quickfire tournaments.',
@@ -522,7 +523,7 @@ class Quickfire(commands.Cog, name="Quickfire"):
         :param player_name: Name of player to add.
         """
         # check if the tournament_name includes 'quickfire'
-        if 'quickfire' not in tournament_name:
+        if 'quickfire'.lower() not in tournament_name.lower():
             embed = discord.Embed(
                 title='Error!',
                 description=f'This command only works for Quickfire tournaments.',
