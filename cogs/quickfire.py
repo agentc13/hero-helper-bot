@@ -327,7 +327,7 @@ class Quickfire(commands.Cog, name="Quickfire"):
                 driver.get(tournament_url)
 
                 # Set the window size
-                driver.set_window_size(1920, 1080)
+                driver.set_window_size(1000, 650)
 
                 # Take a screenshot of the bracket
                 screenshot = driver.get_screenshot_as_png()
