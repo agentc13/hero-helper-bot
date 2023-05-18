@@ -41,46 +41,40 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
 
     @tcl.command(
         name="signup",
-        description="Sign up for the next Thandar Combat League season.",
+        description="Sign up for Thandar Combat League.",
     )
     async def signup(self, context: Context, hr_ign: str):
         """
-        Sign up for the next Thandar Combat League season.
-
+        Sign up for Thandar Combat League.
         :param context: The hybrid command context.
         :param hr_ign: Your Hero Realms In Game Name.
         """
-        # Get the user's ID
-        user_id = context.author.id
-
-        # Check if the user is already signed up
-        if await db_manager.is_signed_up(user_id):
-            # If the user is already signed up, create an embed message indicating that
+        embed = discord.Embed(
+            description=f"You have been added to the Thandar Combat League waitlist. You can find the rules document "
+                        f"[here](https://agentc13.com/tcl-rules.html)",
+            colour=discord.Colour.dark_gold(),
+        )
+        try:
+            await context.author.send(embed=embed)
+            user_id = context.author.id
+            if await db_manager.is_signed_up(user_id):
+                embed = discord.Embed(
+                    description=f"**{context.author}** is already on waitlist.",
+                    colour=discord.Colour.dark_red(),
+                )
+                await context.send(embed=embed)
+                return
+            total = await db_manager.add_user_to_waitlist(user_id, hr_ign)
             embed = discord.Embed(
-                description=f"**{context.author}** is already on waitlist.",
-                colour=discord.Colour.dark_red(),
+                description=f"**{context.author}** has been successfully added to the waitlist.",
+                colour=discord.Colour.dark_blue(),
+            )
+            embed.set_footer(
+                text=f"There {'is' if total == 1 else 'are'} now {total} {'user' if total == 1 else 'users'} in "
+                     f"Thandar Combat League"
             )
             await context.send(embed=embed)
-            return
-
-        # Add the user to the waitlist in the database
-        total = await db_manager.add_user_to_waitlist(user_id, hr_ign)
-
-        # Create an embed message indicating successful signup
-        embed = discord.Embed(
-            description=f"**{context.author}** has been successfully added to the waitlist.",
-            colour=discord.Colour.dark_red(),
-        )
-        embed.set_footer(
-            text=f"There {'is' if total == 1 else 'are'} now {total} {'user' if total == 1 else 'users'} in "
-                 f"Thandar Combat League"
-        )
-
-        try:
-            # Send the embed message to the user via private message
-            await context.author.send(embed=embed)
         except discord.Forbidden:
-            # If sending a private message to the user is forbidden, send the embed message in the channel instead
             await context.send(embed=embed)
 
     @tcl.command(
@@ -439,7 +433,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         embed = discord.Embed(
             title=f'Players signed up for Thandar Combat League',
             description=participant_list,
-            colour=discord.Colour.dark_green(),
+            colour=discord.Colour.dark_magenta(),
         )
         await context.send(embed=embed)
 
