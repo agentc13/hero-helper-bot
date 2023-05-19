@@ -9,6 +9,7 @@ Automate weekly announcements - AC13
 Promote/demote automation - AC13
 
 **Quickfire:**
+Clean-up messages and double check all testing.
 
 **SRDO:**
 Tournament signup command - participants
