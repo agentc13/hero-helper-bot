@@ -40,9 +40,6 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             await context.send(embed=embed)
 
     # This code defines a command named "signup" in a discord bot for signing up for the Thandar Combat League.
-
-    # This code defines a command named "signup" in a discord bot for signing up for the Thandar Combat League.
-
     @tcl.command(
         name="signup",
         description="Sign up for Thandar Combat League.",
@@ -360,7 +357,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         :param name: Name of division.
         """
         new_tournament_name = f'{name}'
-        # Creates a unique url basedonthe tournament name and time
+        # Creates a unique url based on the tournament name and time
         unique_url = f"{name}{int(time.time())}".replace(" ", "")
         # Adds the tournament into Challonge.
         new_tournament = challonge.tournaments.create(new_tournament_name,
@@ -371,15 +368,37 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
                                                       subdomain="b5d0ca83e61253ea7f84a60c",
                                                       tie_breaks=["match wins", "game win percentage", "points scored"]
                                                       )
+
+        # Gets division role id for permissions
+        division_role = discord.utils.get(context.guild.roles, name=f"{name}")
+
+        # If no role with that name exists, create a new one
+        if division_role is None:
+            division_role = await context.guild.create_role(name=f"{name}")
+
+        # Get the category under which to create the channel
+        category = discord.utils.get(context.guild.categories, name="Thandar Combat League")
+
+        # Permissions overwrites
+        overwrites = {
+            context.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+            division_role: discord.PermissionOverwrite(read_messages=True),
+            context.guild.get_member(237772104416755712): discord.PermissionOverwrite(read_messages=True),  # Tim
+            context.guild.get_member(617875604527775767): discord.PermissionOverwrite(read_messages=True),  # Sam
+            context.guild.get_member(189143550091460608): discord.PermissionOverwrite(read_messages=True),  # Chris
+        }
+
+        # Create a new discord channel with the division name
+        await context.guild.create_text_channel(name, overwrites=overwrites, category=category)
+
         # Creates and sends an embed with the tournament info.
         embed = discord.Embed(
-            title="Tournament Created",
-            description=f"Name: {new_tournament_name}\nURL: {unique_url}\nGame: Hero Realms Digital",
+            title="Division Created",
+            description=f"Name: {new_tournament_name}\nGame: Hero Realms Digital",
             colour=discord.Colour.dark_gold(),
         )
         await context.send(embed=embed)
 
-    # Tournament Organizer command to add players into a specified division.
     @tcl.command(
         base="tcl",
         name="add_players",
@@ -393,7 +412,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
 
         :param context: The hybrid command context.
         :param division_name: The Thandar Combat League division that the users should be added to.
-        :param hr_igns: A string of comma-separated Hero Realms In Game Names for the users to be added to Thandar Combat League.
+        :param hr_igns: A string of comma-separated Discord User IDs for the users to be added to Thandar Combat League.
         """
         # Challonge community (subdomain) hosting the tournament
         community_name = "b5d0ca83e61253ea7f84a60c"
@@ -415,15 +434,40 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             # If the tournament exists, add the participants.
             hr_igns_list = [ign.strip() for ign in hr_igns.split(',')]  # Split the input string into a list
 
-            for hr_ign in hr_igns_list:
-                participant = challonge.participants.create(tournament['id'], hr_ign, subdomain=community_name)
+            # Check if the role exists in the guild
+            role = discord.utils.get(context.guild.roles, name=division_name)
+
+            if role is None:
                 embed = discord.Embed(
-                    title="Participant Added",
-                    description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
-                    colour=discord.Colour.dark_blue(),
+                    title='Error!',
+                    description=f'Role "{division_name}" not found.',
+                    colour=discord.Colour.dark_red(),
                 )
                 await context.send(embed=embed)
+            else:
+                for hr_ign in hr_igns_list:
+                    participant = challonge.participants.create(tournament['id'], hr_ign, subdomain=community_name)
 
+                    # Get the member object
+                    member = context.guild.get_member(int(hr_ign))
+
+                    if member is not None:
+                        # Add the role to the member
+                        await member.add_roles(role)
+
+                        embed = discord.Embed(
+                            title="Participant Added",
+                            description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
+                            colour=discord.Colour.dark_blue(),
+                        )
+                        await context.send(embed=embed)
+                    else:
+                        embed = discord.Embed(
+                            title='Error!',
+                            description=f'User "{hr_ign}" not found in this server.',
+                            colour=discord.Colour.dark_red(),
+                        )
+                        await context.send(embed=embed)
     @tcl.command(
         base="tcl",
         name="show_division",
