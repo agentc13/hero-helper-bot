@@ -454,6 +454,23 @@ class Highlander(commands.Cog, name="Highlander"):
                             )
                             await context.send(embed=embed)
 
+    # TO command to show Highlander season standings
+    @hl.command(
+        name="standings",
+        description="Allows a Tournament Organizer to share the season standings for Highlander.",
+        hidden=True,
+    )
+    @commands.has_role("Tournament Organizer")
+    async def start_tournament(self, context: Context):
+        """
+        Allows a Tournament Organizer to share the season standings for Highlander.
+
+        :param context: The hybrid command context.
+        """
+        # Placeholder until I get this worked out.
+        pass
+
+    # TO command to start a tournament
     @hl.command(
         name="start_tournament",
         description="Allows a Tournament Organizer to start a Highlander tournament in Challonge.",
