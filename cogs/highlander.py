@@ -56,8 +56,11 @@ class Highlander(commands.Cog, name="Highlander"):
         :param context: The hybrid command context.
         :param participant_name: Hero Realms IGN.
         """
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "hrhighlander"
+
         # Searches through all pending tournaments and get the current Highlander tournament if there is one.
-        tournaments = challonge.tournaments.index(state='pending')
+        tournaments = challonge.tournaments.index(state='pending', subdomain=community_name)
         highlander_tournament = None
         for t in tournaments:
             if 'Highlander'.lower() in t['name'].lower():
@@ -105,9 +108,12 @@ class Highlander(commands.Cog, name="Highlander"):
 
         :param context: The hybrid command context.
         """
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "hrhighlander"
+
         # Searches through all pending and in progress tournaments and get the current Highlander tournament if there is one.
-        pending_tournaments = challonge.tournaments.index(state='pending')
-        in_progress_tournaments = challonge.tournaments.index(state='in progress')
+        pending_tournaments = challonge.tournaments.index(state='pending', subdomain=community_name)
+        in_progress_tournaments = challonge.tournaments.index(state='in progress', subdomain=community_name)
 
         # Combine both lists
         tournaments = pending_tournaments + in_progress_tournaments
@@ -147,8 +153,14 @@ class Highlander(commands.Cog, name="Highlander"):
 
         :param context: The hybrid command context.
         """
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "hrhighlander"
+
+        # Fetch the highlander role
+        announcement_role = discord.utils.get(context.guild.roles, name="highlander")
+
         # Searches through all pending tournaments and get the current Highlander tournament if there is one.
-        tournaments = challonge.tournaments.index(state='in progress')
+        tournaments = challonge.tournaments.index(state='in progress', subdomain=community_name)
         highlander_tournament = None
         for t in tournaments:
             if 'Highlander'.lower() in t['name'].lower():
@@ -164,7 +176,7 @@ class Highlander(commands.Cog, name="Highlander"):
             await context.send(embed=embed)
 
         else:
-            matches = challonge.matches.index(highlander_tournament['id'], state='open')
+            matches = challonge.matches.index(highlander_tournament['id'], state='open', subdomain=community_name)
             participants = challonge.participants.index(highlander_tournament['id'])
             participant_ids = {p['id']: p for p in participants}
             bracket = []
@@ -200,8 +212,11 @@ class Highlander(commands.Cog, name="Highlander"):
 
         :param context: The command context.
         """
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "hrhighlander"
+
         # Searches through all in progress tournaments and get the current Highlander tournament if there is one.
-        tournaments = challonge.tournaments.index(state='in progress')
+        tournaments = challonge.tournaments.index(state='in progress', subdomain=community_name)
         highlander_tournament = None
         for t in tournaments:
             if 'Highlander'.lower() in t['name'].lower():
@@ -229,16 +244,22 @@ class Highlander(commands.Cog, name="Highlander"):
 
     @hl.command(
         name="bracket",
-        description="Displays the bracket link for the specified tournament.",
+        description="Displays the bracket image for the specified tournament.",
     )
-    async def bracket_link(self, context: Context):
+    async def bracket(self, context: Context):
         """
-        Displays the bracket link for the specified tournament.
+        Displays the bracket image for the specified tournament.
 
         :param context: The command context.
         """
+        # Defer the command response
+        await context.defer()
+
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "hrhighlander"
+
         # Searches through all pending tournaments and get the current Highlander tournament if there is one.
-        tournaments = challonge.tournaments.index(state='in progress')
+        tournaments = challonge.tournaments.index(state='in progress', subdomain=community_name)
         highlander_tournament = None
         for t in tournaments:
             if 'Highlander'.lower() in t['name'].lower():
@@ -255,6 +276,16 @@ class Highlander(commands.Cog, name="Highlander"):
         else:
             # Get the tournament URL
             tournament_url = highlander_tournament['live_image_url']
+            # Get number of participants
+            num_participants = highlander_tournament['participants_count']
+
+            # Set the resolution based on the number of participants
+            if num_participants <= 16:
+                resolution = (1000, 650)
+            elif num_participants <= 32:
+                resolution = (1300, 1050)
+            else:
+                resolution = (2000, 2000)
 
             # Set up the headless browser
             options = webdriver.ChromeOptions()
@@ -271,7 +302,7 @@ class Highlander(commands.Cog, name="Highlander"):
                 driver.get(tournament_url)
 
                 # Set the window size
-                driver.set_window_size(1000, 650)
+                driver.set_window_size(*resolution)
 
                 # Take a screenshot of the bracket
                 screenshot = driver.get_screenshot_as_png()
@@ -313,12 +344,15 @@ class Highlander(commands.Cog, name="Highlander"):
         :param round_number: Round number of the match.
         :param winner: Name of the winner.
         """
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "hrhighlander"
+
         # Searches through all pending tournaments and get the current Highlander tournament if there is one.
-        tournaments = challonge.tournaments.index(state='in progress')
+        tournaments = challonge.tournaments.index(state='in progress', subdomain=community_name)
         highlander_tournament = None
 
-        # Fetch the quickfire role
-        announcement_role = discord.utils.get(context.guild.roles, name="highlander")
+        # Fetch the highlander role
+        announcement_role = discord.utils.get(context.guild.roles, name="Highlander")
 
         for t in tournaments:
             if 'Highlander'.lower() in t['name'].lower():
@@ -334,7 +368,7 @@ class Highlander(commands.Cog, name="Highlander"):
             await context.send(embed=embed)
         else:
             # Fetch all open matches in the tournament
-            matches = challonge.matches.index(highlander_tournament['id'], state='open')
+            matches = challonge.matches.index(highlander_tournament['id'], state='open', subdomain=community_name)
 
             # Get participants of the tournament
             participants = challonge.participants.index(highlander_tournament['id'])
@@ -401,13 +435,13 @@ class Highlander(commands.Cog, name="Highlander"):
                     await context.send(embed=embed)
 
                     # Check if all matches are completed
-                    matches = challonge.matches.index(highlander_tournament['id'], state='all')
+                    matches = challonge.matches.index(highlander_tournament['id'], state='all', subdomain=community_name)
                     if all(m['state'] == 'complete' for m in matches):
                         # Finalize the tournament
-                        challonge.tournaments.finalize(highlander_tournament['id'])
+                        challonge.tournaments.finalize(highlander_tournament['id'], subdomain=community_name)
 
                         # Check if the tournament is complete
-                        tournament = challonge.tournaments.show(highlander_tournament['id'])
+                        tournament = challonge.tournaments.show(highlander_tournament['id'], subdomain=community_name)
                         if tournament['state'] == 'complete':
                             # Find the winner in the list of participants
                             final_winner = next((p for p in participants if p["id"] == winner_id), None)
@@ -415,10 +449,55 @@ class Highlander(commands.Cog, name="Highlander"):
                             # Create an embed with the winner's information
                             embed = discord.Embed(
                                 title=f'{highlander_tournament["name"]} is complete!',
-                                description=f'Congratulations to the winner: {original_winner_name}\n\n{announcement_role.mention}, please take note.',
+                                description=f'{announcement_role.mention}\n\nCongratulations to the winner: {original_winner_name}',
                                 colour=discord.Colour.dark_gold(),
                             )
                             await context.send(embed=embed)
+
+    @hl.command(
+        name="start_tournament",
+        description="Allows a Tournament Organizer to start a Highlander tournament in Challonge.",
+        hidden=True,
+    )
+    @commands.has_role("Tournament Organizer")
+    async def start_tournament(self, context: Context):
+        """
+        Allows a Tournament Organizer to start a Highlander tournament in challonge.
+
+        :param context: The hybrid command context.
+        """
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "hrhighlander"
+
+        # Fetch the highlander role
+        announcement_role = discord.utils.get(context.guild.roles, name="Highlander")
+
+        # Get the list of all tournaments
+        tournaments = challonge.tournaments.index(state='pending', subdomain=community_name)
+        highlander_tournament = None
+        for t in tournaments:
+            if 'Highlander'.lower() in t['name'].lower():
+                highlander_tournament = t
+                break
+
+        if highlander_tournament is None:
+            embed = discord.Embed(
+                title='Error!',
+                description=f'There is no Highlander tournament pending.',
+                colour=discord.Colour.dark_red(),
+            )
+            await context.send(embed=embed)
+        else:
+            # Randomize seeds before starting the tournament
+            challonge.participants.randomize(highlander_tournament['id'])
+
+            challonge.tournaments.start(highlander_tournament['id'], subdomain=community_name)
+            embed = discord.Embed(
+                title="Tournament Started",
+                description=f'{announcement_role.mention}\n{highlander_tournament["name"]} has started!',
+                colour=discord.Colour.dark_blue(),
+            )
+            await context.send(embed=embed)
 
 
 async def setup(bot):

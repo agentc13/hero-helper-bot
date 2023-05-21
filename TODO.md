@@ -28,10 +28,6 @@ Finalize SE tournament command - TO
 Winner announcement command - AC13
 
 **Highlander**
-Create tournament command - TO
-Signup command - participants
-Start tournament command - TO
-Finalize tournament command - TO
 Season Standings command - TO
 Add participants from challonge to DB - AC13
 Event/season points - AC13
