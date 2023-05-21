@@ -98,6 +98,101 @@ class Highlander(commands.Cog, name="Highlander"):
                     await context.author.add_roles(role)
 
     @hl.command(
+        name="show_players",
+        description="Displays participants in a Highlander tournament.",
+    )
+    async def show_players(self, context: Context):
+        """
+        Displays participants in a Highlander tournament.
+
+        :param context: The hybrid command context.
+        """
+        # Searches through all pending and in progress tournaments and get the current Highlander tournament if there is one.
+        pending_tournaments = challonge.tournaments.index(state='pending')
+        in_progress_tournaments = challonge.tournaments.index(state='in progress')
+
+        # Combine both lists
+        tournaments = pending_tournaments + in_progress_tournaments
+
+        highlander_tournament = None
+        for t in tournaments:
+            if 'Highlander'.lower() in t['name'].lower():
+                highlander_tournament = t
+                break
+
+        if highlander_tournament is None:
+            embed = discord.Embed(
+                title='Error!',
+                description=f'There is no pending or in progress Highlander tournament.',
+                colour=discord.Colour.dark_red(),
+            )
+            await context.send(embed=embed)
+        else:
+            participants = challonge.participants.index(highlander_tournament['id'])
+            participant_names = [p['name'] for p in participants]
+            participant_list = '\n'.join(participant_names)
+            embed = discord.Embed(
+                title=f'Participants in tournament "{highlander_tournament["name"]}"',
+                description=participant_list,
+                colour=discord.Colour.dark_magenta(),
+            )
+            await context.send(embed=embed)
+
+    # Define the show_matches command, which returns a list of matches for a tournament
+    @hl.command(
+        name="show_matches",
+        description="Displays open matches for a Highlander tournament.",
+    )
+    async def show_matches(self, context: Context):
+        """
+        Displays open matches for a Highlander tournament.
+
+        :param context: The hybrid command context.
+        """
+        # Searches through all pending tournaments and get the current Highlander tournament if there is one.
+        tournaments = challonge.tournaments.index(state='in progressd')
+        highlander_tournament = None
+        for t in tournaments:
+            if 'Highlander'.lower() in t['name'].lower():
+                highlander_tournament = t
+                break
+
+        if highlander_tournament is None:
+            embed = discord.Embed(
+                title='Error!',
+                description=f'There is no Highlander tournament in progress.',
+                colour=discord.Colour.dark_red(),
+            )
+            await context.send(embed=embed)
+
+        else:
+            matches = challonge.matches.index(highlander_tournament['id'], state='open')
+            participants = challonge.participants.index(highlander_tournament['id'])
+            participant_ids = {p['id']: p for p in participants}
+            bracket = []
+            for match in matches:
+                if match['player1_id'] is not None and match['player2_id'] is not None:
+                    p1_name = participant_ids[match['player1_id']]['name']
+                    p2_name = participant_ids[match['player2_id']]['name']
+                else:
+                    p1_name = "TBD"
+                    p2_name = "TBD"
+                round_num = match.get('round', 'N/A')
+                bracket.append((match['id'], p1_name, p2_name, round_num))
+            bracket_str = tabulate(bracket, headers=["Match ID", "Player 1", "Player 2", "Round"])
+
+            embed = discord.Embed(
+                title=highlander_tournament["name"],
+                description='Tournament Bracket',
+                colour=discord.Colour.dark_green(),
+            )
+            embed.add_field(name='Round', value='\n'.join([str(b[3]) for b in bracket]))
+            embed.add_field(name='Player 1', value='\n'.join([b[1] for b in bracket]))
+            embed.add_field(name='Player 2', value='\n'.join([b[2] for b in bracket]))
+
+            await context.send(embed=embed)
+
+    @hl.command(
         name="bracket_link",
         description="Displays the bracket link for the specified tournament.",
     )
@@ -206,6 +301,7 @@ class Highlander(commands.Cog, name="Highlander"):
                     colour=discord.Colour.dark_red(),
                 )
                 await context.send(embed=embed)
+
 
 async def setup(bot):
     await bot.add_cog(Highlander(bot))
