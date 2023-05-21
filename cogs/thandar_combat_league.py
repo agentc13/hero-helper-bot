@@ -412,7 +412,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
 
         :param context: The hybrid command context.
         :param division_name: The Thandar Combat League division that the users should be added to.
-        :param hr_igns: A string of comma-separated Discord User IDs for the users to be added to Thandar Combat League.
+        :param hr_igns: A string of comma-separated usernames for the users to be added to Thandar Combat League.
         """
         # Challonge community (subdomain) hosting the tournament
         community_name = "b5d0ca83e61253ea7f84a60c"
@@ -434,40 +434,16 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             # If the tournament exists, add the participants.
             hr_igns_list = [ign.strip() for ign in hr_igns.split(',')]  # Split the input string into a list
 
-            # Check if the role exists in the guild
-            role = discord.utils.get(context.guild.roles, name=division_name)
+            for hr_ign in hr_igns_list:
+                participant = challonge.participants.create(tournament['id'], hr_ign, subdomain=community_name)
 
-            if role is None:
                 embed = discord.Embed(
-                    title='Error!',
-                    description=f'Role "{division_name}" not found.',
-                    colour=discord.Colour.dark_red(),
+                    title="Participant Added",
+                    description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
+                    colour=discord.Colour.dark_blue(),
                 )
                 await context.send(embed=embed)
-            else:
-                for hr_ign in hr_igns_list:
-                    participant = challonge.participants.create(tournament['id'], hr_ign, subdomain=community_name)
 
-                    # Get the member object
-                    member = context.guild.get_member(int(hr_ign))
-
-                    if member is not None:
-                        # Add the role to the member
-                        await member.add_roles(role)
-
-                        embed = discord.Embed(
-                            title="Participant Added",
-                            description=f'Participant {participant["name"]} added to tournament {tournament["name"]}',
-                            colour=discord.Colour.dark_blue(),
-                        )
-                        await context.send(embed=embed)
-                    else:
-                        embed = discord.Embed(
-                            title='Error!',
-                            description=f'User "{hr_ign}" not found in this server.',
-                            colour=discord.Colour.dark_red(),
-                        )
-                        await context.send(embed=embed)
     @tcl.command(
         base="tcl",
         name="show_division",
