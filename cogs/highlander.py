@@ -1,7 +1,5 @@
 import challonge
 import discord
-import time
-import re
 from discord.ext import commands
 from discord.ext.commands import Context
 from tabulate import tabulate
@@ -150,7 +148,7 @@ class Highlander(commands.Cog, name="Highlander"):
         :param context: The hybrid command context.
         """
         # Searches through all pending tournaments and get the current Highlander tournament if there is one.
-        tournaments = challonge.tournaments.index(state='in progressd')
+        tournaments = challonge.tournaments.index(state='in progress')
         highlander_tournament = None
         for t in tournaments:
             if 'Highlander'.lower() in t['name'].lower():
@@ -301,6 +299,126 @@ class Highlander(commands.Cog, name="Highlander"):
                     colour=discord.Colour.dark_red(),
                 )
                 await context.send(embed=embed)
+
+    # Define the report command, which allows users to report the result of a match
+    @hl.command(
+        name="report",
+        description="Report a Highlander match result.",
+    )
+    async def report(self, context: Context,  round_number: int, winner: str):
+        """
+        Report a Highlander match result.
+
+        :param context: The hybrid command context.
+        :param round_number: Round number of the match.
+        :param winner: Name of the winner.
+        """
+        # Searches through all pending tournaments and get the current Highlander tournament if there is one.
+        tournaments = challonge.tournaments.index(state='in progress')
+        highlander_tournament = None
+
+        # Fetch the quickfire role
+        announcement_role = discord.utils.get(context.guild.roles, name="highlander")
+
+        for t in tournaments:
+            if 'Highlander'.lower() in t['name'].lower():
+                highlander_tournament = t
+                break
+
+        if highlander_tournament is None:
+            embed = discord.Embed(
+                title='Error!',
+                description=f'There is no Highlander tournament pending.',
+                colour=discord.Colour.dark_red(),
+            )
+            await context.send(embed=embed)
+        else:
+            # Fetch all open matches in the tournament
+            matches = challonge.matches.index(highlander_tournament['id'], state='open')
+
+            # Get participants of the tournament
+            participants = challonge.participants.index(highlander_tournament['id'])
+
+            # Store the original winner name
+            original_winner_name = winner
+
+            # Convert winner to lower case
+            winner = winner.lower()
+
+            # Find the winner in the list of participants
+            winner_participant = next((p for p in participants if p["name"].lower() == winner), None)
+
+            # Determine the winner's ID
+            winner_id = winner_participant['id']
+
+            # Find the match which is the correct round and includes the winner id
+            match = next((m for m in matches if m['round'] == round_number and (
+                        m['player1_id'] == winner_id or m['player2_id'] == winner_id)), None)
+
+            # If the match is not found or already completed, send an error message
+            if match is None:
+                embed = discord.Embed(
+                    title="Error",
+                    description=f'Match in round {round_number} not found or already completed in tournament {highlander_tournament["name"]}',
+                    colour=discord.Colour.dark_red(),
+                )
+                await context.send(embed=embed)
+            else:
+                # If the winner is not found in the list of participants, send an error message
+                if winner_participant is None:
+                    embed = discord.Embed(
+                        title="Error",
+                        description=f'Winner "{winner}" not found in the list of participants',
+                        colour=discord.Colour.dark_red(),
+                    )
+                    await context.send(embed=embed)
+                    return
+
+                # Check if the winner is either player 1 or player 2 of the match
+                if winner_id not in [match['player1_id'], match['player2_id']]:
+                    embed = discord.Embed(
+                        title='Error',
+                        description=f'Winner "{winner}" is not a player in the match of round {round_number}',
+                        colour=discord.Colour.dark_red(),
+                    )
+                    await context.send(embed=embed)
+                else:
+                    # Determine the score (1-0) for the winner
+                    scores_csv = "1-0" if winner_id == match['player1_id'] else "0-1"
+
+                    # Update the match and mark it as complete
+                    challonge.matches.update(
+                        highlander_tournament['id'],
+                        match['id'],
+                        scores_csv=scores_csv,
+                        winner_id=winner_id
+                    )
+                    embed = discord.Embed(
+                        title='Match Reported',
+                        description=f'Match result reported for match in round {round_number} in tournament {highlander_tournament["name"]}. {original_winner_name} won 1-0',
+                        colour=discord.Colour.dark_blue(),
+                    )
+                    await context.send(embed=embed)
+
+                    # Check if all matches are completed
+                    matches = challonge.matches.index(highlander_tournament['id'], state='all')
+                    if all(m['state'] == 'complete' for m in matches):
+                        # Finalize the tournament
+                        challonge.tournaments.finalize(highlander_tournament['id'])
+
+                        # Check if the tournament is complete
+                        tournament = challonge.tournaments.show(highlander_tournament['id'])
+                        if tournament['state'] == 'complete':
+                            # Find the winner in the list of participants
+                            final_winner = next((p for p in participants if p["id"] == winner_id), None)
+
+                            # Create an embed with the winner's information
+                            embed = discord.Embed(
+                                title=f'{highlander_tournament["name"]} is complete!',
+                                description=f'Congratulations to the winner: {original_winner_name}\n\n{announcement_role.mention}, please take note.',
+                                colour=discord.Colour.dark_gold(),
+                            )
+                            await context.send(embed=embed)
 
 
 async def setup(bot):
