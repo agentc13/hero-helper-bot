@@ -793,6 +793,5 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             await context.send(embed=embed)
 
 
-
 async def setup(bot):
     await bot.add_cog(Tcl(bot))
