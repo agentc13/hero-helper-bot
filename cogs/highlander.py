@@ -226,7 +226,7 @@ class Highlander(commands.Cog, name="Highlander"):
         if highlander_tournament is None:
             embed = discord.Embed(
                 title='Error!',
-                description=f'There is no Highlander tournament pending.',
+                description=f'There is no Highlander tournament in progress.',
                 colour=discord.Colour.dark_red(),
             )
             await context.send(embed=embed)
@@ -269,7 +269,7 @@ class Highlander(commands.Cog, name="Highlander"):
         if highlander_tournament is None:
             embed = discord.Embed(
                 title='Error!',
-                description=f'There is no Highlander tournament pending.',
+                description=f'There is no Highlander tournament in progress.',
                 colour=discord.Colour.dark_red(),
             )
             await context.send(embed=embed)
@@ -362,7 +362,7 @@ class Highlander(commands.Cog, name="Highlander"):
         if highlander_tournament is None:
             embed = discord.Embed(
                 title='Error!',
-                description=f'There is no Highlander tournament pending.',
+                description=f'There is no Highlander tournament in progress.',
                 colour=discord.Colour.dark_red(),
             )
             await context.send(embed=embed)
@@ -461,7 +461,7 @@ class Highlander(commands.Cog, name="Highlander"):
         hidden=True,
     )
     @commands.has_role("Tournament Organizer")
-    async def start_tournament(self, context: Context):
+    async def standings(self, context: Context):
         """
         Allows a Tournament Organizer to share the season standings for Highlander.
 
