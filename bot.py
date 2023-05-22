@@ -95,6 +95,7 @@ logger_discord_gateway.addHandler(console_handler)
 logger_discord_gateway.addHandler(file_handler)
 logger_discord_gateway.propagate = False  # avoid duplicate logs
 
+
 async def init_db():
     async with aiosqlite.connect(
             f"{os.path.realpath(os.path.dirname(__file__))}/database/database.db"

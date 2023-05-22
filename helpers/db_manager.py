@@ -62,3 +62,24 @@ async def remove_user_from_waitlist(user_id: int):
         async with rows as cursor:
             result = await cursor.fetchone()
             return result[0] if result is not None else 0
+
+
+async def add_user_to_participants(user_id: int, hr_ign: str):
+    """
+    This function will add a user based on its ID to the participants list.
+
+    :param user_id: The ID of the user that should be added into the participants list.
+    :param hr_ign: The Hero Realms In Game Name of the user to be added into the participants list.
+    """
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        await db.execute("INSERT INTO tcl_participants(user_id, hr_ign) VALUES (?, ?)", (user_id, hr_ign))
+        await db.commit()
+
+
+async def clear_waitlist():
+    """
+    This function will remove all users from the waitlist.
+    """
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        await db.execute("DELETE FROM waitlist")
+        await db.commit()

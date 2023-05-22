@@ -100,17 +100,17 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         name="report",
         description="Allows user to report a Thandar Combat League match result.",
     )
-    async def report(self, context: Context, division_name: str, round_number: int, winner_name: str,
-                     games_won_by_winner: int):
+    async def report(self, context: Context, round_number: int, winner_name: str, games_won_by_winner: int):
         """
         Allows user to report a Thandar Combat League match result.
 
         :param context: The hybrid command context.
-        :param division_name: The name of the division.
         :param round_number: The round number in which the match took place.
         :param winner_name: The name of the winner of the match.
         :param games_won_by_winner: The number of games won by the winner of the match.
         """
+        division_name = context.channel.name  # Get division_name from channel name
+
         # Challonge community (subdomain) hosting the tournament
         community_name = "b5d0ca83e61253ea7f84a60c"
 
@@ -199,13 +199,14 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         name="standings",
         description="Display the standings for a Thandar Combat League division.",
     )
-    async def standings(self, context: Context, division_name: str):
+    async def standings(self, context: Context):
         """
         Display the standings for a Thandar Combat League division.
 
         :param context: The hybrid command context.
-        :param division_name: The name of the Thandar Combat League division.
         """
+        division_name = context.channel.name  # Get division_name from channel name
+
         # Challonge community (subdomain) hosting the tournament
         community_name = "b5d0ca83e61253ea7f84a60c"
 
@@ -372,6 +373,9 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         # Gets division role id for permissions
         division_role = discord.utils.get(context.guild.roles, name=f"{name}")
 
+        # Get the Hero-Helper role
+        hero_helper_role = discord.utils.get(context.guild.roles, name="Hero-Helper")
+
         # If no role with that name exists, create a new one
         if division_role is None:
             division_role = await context.guild.create_role(name=f"{name}")
@@ -381,8 +385,9 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
 
         # Permissions overwrites
         overwrites = {
-            context.guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            division_role: discord.PermissionOverwrite(read_messages=True),
+            context.guild.default_role: discord.PermissionOverwrite(read_messages=False),  # Default
+            division_role: discord.PermissionOverwrite(read_messages=True),  # Division
+            hero_helper_role: discord.PermissionOverwrite(read_messages=True),  # Hero-Helper
             context.guild.get_member(237772104416755712): discord.PermissionOverwrite(read_messages=True),  # Tim
             context.guild.get_member(617875604527775767): discord.PermissionOverwrite(read_messages=True),  # Sam
             context.guild.get_member(189143550091460608): discord.PermissionOverwrite(read_messages=True),  # Chris
@@ -656,13 +661,72 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         if tournament is None:
             embed = discord.Embed(
                 title='Error!',
-                description=f'TDivision "{division_name}" not found.',
+                description=f'Division "{division_name}" not found.',
                 colour=discord.Colour.dark_red(),
             )
             await context.send(embed=embed)
         else:
             # Finalize the tournament
             challonge.tournaments.finalize(tournament['id'], subdomain=community_name)
+
+    @tcl.command(
+        name="start_season",
+        description="Starts a new season of Thandar Combat League.",
+    )
+    @commands.has_role("Tournament Organizer")
+    async def start_season(self, context: Context):
+        """
+        Start a new season for Thandar Combat League.
+        :param context: The command context.
+        """
+        try:
+            # Challonge community (subdomain) hosting the tournament
+            community_name = "b5d0ca83e61253ea7f84a60c"
+
+            # Get all users from the waitlist.
+            waitlist = await db_manager.get_waitlist()
+
+            # For each user in the waitlist, add them to the tcl_participants table.
+            for user in waitlist:
+                await db_manager.add_user_to_participants(user[0], user[1])
+
+            # Clear the waitlist for the next season.
+            await db_manager.clear_waitlist()
+
+            # Get the list of all tournaments
+            tournaments = challonge.tournaments.index(state='all', subdomain=community_name)
+
+            # Find all tournaments that start with 'TCL'
+            tcl_tournaments = [t for t in tournaments if t['name'].lower().startswith('tcl')]
+
+            # Start each TCL tournament
+            for tournament in tcl_tournaments:
+                # Randomize seeds before starting the tournament
+                challonge.participants.randomize(tournament['id'])
+
+                challonge.tournaments.start(tournament['id'], subdomain=community_name)
+
+            # Create an embed message indicating the start of the new season.
+            embed = discord.Embed(
+                title="New Season!",
+                description=f"A new season of Thandar Combat League has started with {len(tcl_tournaments)} division(s)! Let the combat begin!",
+                colour=discord.Colour.dark_blue(),
+            )
+            embed.set_footer(
+                text=f"There {'is' if len(waitlist) == 1 else 'are'} now {len(waitlist)} {'participant' if len(waitlist) == 1 else 'participants'} in "
+                     f"this season of Thandar Combat League"
+            )
+
+            # Send the embed message indicating successful season start to the channel where the command was triggered.
+            await context.send(embed=embed)
+        except Exception as e:
+            # If there was an error starting the season, send a message indicating the error.
+            embed = discord.Embed(
+                title="Error!",
+                description=f"An error occurred while trying to start the season: {str(e)}",
+                colour=discord.Colour.dark_red(),
+            )
+            await context.send(embed=embed)
 
 
 async def setup(bot):
