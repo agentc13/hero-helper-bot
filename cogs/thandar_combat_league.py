@@ -670,19 +670,17 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             challonge.tournaments.finalize(tournament['id'], subdomain=community_name)
 
     @tcl.command(
-        name="start_season",
-        description="Starts a new season of Thandar Combat League.",
+        name="create_season",
+        description="Creates a new season of Thandar Combat League.",
     )
     @commands.has_role("Tournament Organizer")
-    async def start_season(self, context: Context):
+    async def create_season(self, context: Context, season_number: int):
         """
-        Start a new season for Thandar Combat League.
+        Creates a new season for Thandar Combat League.
         :param context: The command context.
+        :param season_number: The season number.
         """
         try:
-            # Challonge community (subdomain) hosting the tournament
-            community_name = "b5d0ca83e61253ea7f84a60c"
-
             # Get all users from the waitlist.
             waitlist = await db_manager.get_waitlist()
 
@@ -693,28 +691,32 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             # Clear the waitlist for the next season.
             await db_manager.clear_waitlist()
 
-            # Get the list of all tournaments
-            tournaments = challonge.tournaments.index(state='all', subdomain=community_name)
+            # Provided division names
+            division_names = ["Fire Bomb", "Domination", "Rampage", "Life Drain", "Deception", "Command", "Elven Curse", "Death Touch"]
 
-            # Find all tournaments that start with 'TCL'
-            tcl_tournaments = [t for t in tournaments if t['name'].lower().startswith('tcl')]
+            # Calculate the number of divisions to be created
+            num_divisions = len(waitlist) // 8
+            if len(waitlist) % 8 != 0:
+                num_divisions += 1  # Add one more division if there are leftover participants
 
-            # Start each TCL tournament
-            for tournament in tcl_tournaments:
-                # Randomize seeds before starting the tournament
-                challonge.participants.randomize(tournament['id'])
+            # Ensure there are enough division names for the divisions to be created
+            if num_divisions > len(division_names):
+                raise ValueError("Not enough division names provided for the number of divisions to be created")
 
-                challonge.tournaments.start(tournament['id'], subdomain=community_name)
+            # Create each division using the provided names
+            for i in range(num_divisions):
+                # Prefix each division name with "S# "
+                division_name = f"S{season_number} {division_names[i]}"
+                await self.create_division(context, division_name)
 
             # Create an embed message indicating the start of the new season.
             embed = discord.Embed(
-                title="New Season!",
-                description=f"A new season of Thandar Combat League has started with {len(tcl_tournaments)} division(s)! Let the combat begin!",
+                title="Season Created!",
+                description=f"Season {season_number} of Thandar Combat League has been created with {num_divisions} division(s)!",
                 colour=discord.Colour.dark_blue(),
             )
             embed.set_footer(
-                text=f"There {'is' if len(waitlist) == 1 else 'are'} now {len(waitlist)} {'participant' if len(waitlist) == 1 else 'participants'} in "
-                     f"this season of Thandar Combat League"
+                text=f"There are now {len(waitlist)} participants in this season of Thandar Combat League."
             )
 
             # Send the embed message indicating successful season start to the channel where the command was triggered.
@@ -723,10 +725,73 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             # If there was an error starting the season, send a message indicating the error.
             embed = discord.Embed(
                 title="Error!",
-                description=f"An error occurred while trying to start the season: {str(e)}",
+                description=f"An error occurred while trying to create the season: {str(e)}",
                 colour=discord.Colour.dark_red(),
             )
             await context.send(embed=embed)
+
+    @tcl.command(
+        name="start_season",
+        description="Starts a new season of Thandar Combat League.",
+    )
+    @commands.has_role("Tournament Organizer")
+    async def start_season(self, context: Context, season: int):
+        """
+        Start a new season for Thandar Combat League.
+        :param context: The command context.
+        :param season: The season number.
+        """
+        # Get all users from the waitlist.
+        waitlist = await db_manager.get_waitlist()
+
+        # For each user in the waitlist, add them to the tcl_participants table.
+        for user in waitlist:
+            await db_manager.add_user_to_participants(user[0], user[1])
+
+        # Clear the waitlist for the next season.
+        await db_manager.clear_waitlist()
+
+        try:
+            # Challonge community (subdomain) hosting the tournament
+            community_name = "b5d0ca83e61253ea7f84a60c"
+
+            # Get the list of all tournaments
+            tournaments = challonge.tournaments.index(state='all', subdomain=community_name)
+
+            # Find all tournaments that start with 'S{season}'
+            season_tournaments = [t for t in tournaments if t['name'].lower().startswith(f's{season}')]
+
+            # Start each season tournament
+            for tournament in season_tournaments:
+                # Randomize seeds before starting the tournament
+                challonge.participants.randomize(tournament['id'])
+
+                challonge.tournaments.start(tournament['id'], subdomain=community_name)
+
+            # Create an embed message indicating the start of the new season.
+            embed = discord.Embed(
+                title="New Season!",
+                description=f"Season {season} of Thandar Combat League has started with {len(season_tournaments)} division(s)! Let the combat begin!",
+                colour=discord.Colour.dark_blue(),
+            )
+            embed.set_footer(
+                text=f"There are now {len(waitlist)} participants in season {season} of Thandar Combat League!"
+            )
+
+            # Get the specific channel to send the message to.
+            channel = self.bot.get_channel(1088139363294130200)
+
+            # Send the embed message indicating successful season start to the specific channel.
+            await channel.send(embed=embed)
+        except Exception as e:
+            # If there was an error starting the season, send a message indicating the error.
+            embed = discord.Embed(
+                title="Error!",
+                description=f"An error occurred while trying to start season {season}: {str(e)}",
+                colour=discord.Colour.dark_red(),
+            )
+            await context.send(embed=embed)
+
 
 
 async def setup(bot):

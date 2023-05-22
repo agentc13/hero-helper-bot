@@ -72,8 +72,11 @@ async def add_user_to_participants(user_id: int, hr_ign: str):
     :param hr_ign: The Hero Realms In Game Name of the user to be added into the participants list.
     """
     async with aiosqlite.connect(DATABASE_PATH) as db:
-        await db.execute("INSERT INTO tcl_participants(user_id, hr_ign) VALUES (?, ?)", (user_id, hr_ign))
-        await db.commit()
+        cursor = await db.execute("SELECT * FROM tcl_participants WHERE user_id = ?", (user_id,))
+        data = await cursor.fetchone()
+        if data is None:
+            await db.execute("INSERT INTO tcl_participants(user_id, hr_ign) VALUES (?, ?)", (user_id, hr_ign))
+            await db.commit()
 
 
 async def clear_waitlist():
