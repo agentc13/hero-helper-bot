@@ -305,7 +305,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         description="Removes a player from the Thandar Combat League waitlist.",
         hidden=True,
     )
-    @commands.has_role("Tournament Organizer")
+    @commands.has_role("TCL Organizer")
     async def remove_waitlist(self, context: Context, user: discord.User):
         """
         Removes a player from the Thandar Combat League waitlist.
@@ -349,7 +349,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         description="Creates a new Thandar Combat League division.",
         hidden=True,
     )
-    @commands.has_role("Tournament Organizer")
+    @commands.has_role("TCL Organizer")
     async def create_division(self, context: Context, name: str):
         """
         Creates a new Thandar Combat League division.
@@ -410,7 +410,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         description="Adds players to Thandar Combat League division.",
         hidden=True,
     )
-    @commands.has_role("Tournament Organizer")
+    @commands.has_role("TCL Organizer")
     async def add_players(self, context: Context, division_name: str, hr_igns: str):
         """
         Adds players to Thandar Combat League division.
@@ -455,7 +455,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         description="Lists the players in a Thandar Combat League division.",
         hidden=True,
     )
-    @commands.has_role("Tournament Organizer")
+    @commands.has_role("TCL Organizer")
     async def show_division(self, context: Context, division_name: str):
         """
         Lists the players in a Thandar Combat League division.
@@ -501,7 +501,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         description="Lists the players in the Thandar Combat League waitlist.",
         hidden=True,
     )
-    @commands.has_role("Tournament Organizer")
+    @commands.has_role("TCL Organizer")
     async def show_waitlist(self, context: Context):
         """
         Lists the players in the Thandar Combat League waitlist.
@@ -526,7 +526,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         description="Display the weeks' matches for a Thandar Combat League division up to a specified round.",
         hidden=True,
     )
-    @commands.has_role("Tournament Organizer")
+    @commands.has_role("TCL Organizer")
     async def show_matches(self, context: Context, division_name: str, max_round: int):
         """
         Display the weeks' matches for a Thandar Combat League division up to a specified round.
@@ -602,7 +602,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         description="Allows a Tournament Organizer to start a TCL division in Challonge.",
         hidden=True,
     )
-    @commands.has_role("Tournament Organizer")
+    @commands.has_role("TCL Organizer")
     async def start_division(self, context: Context, division_name: str):
         """
         Allows a Tournament Organizer to start a TCL division in challonge.
@@ -644,7 +644,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         description="Finalizes the season for a Thandar Combat League division.",
         hidden=True,
     )
-    @commands.has_role("Tournament Organizer")
+    @commands.has_role("TCL Organizer")
     async def end_division(self, context: Context, division_name: str):
         """
         Finalizes the season for a Thandar Combat League division.
@@ -673,7 +673,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         name="create_season",
         description="Creates a new season of Thandar Combat League.",
     )
-    @commands.has_role("Tournament Organizer")
+    @commands.has_role("TCL Organizer")
     async def create_season(self, context: Context, season_number: int):
         """
         Creates a new season for Thandar Combat League.
@@ -734,7 +734,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         name="start_season",
         description="Starts a new season of Thandar Combat League.",
     )
-    @commands.has_role("Tournament Organizer")
+    @commands.has_role("TCL Organizer")
     async def start_season(self, context: Context, season: int):
         """
         Start a new season for Thandar Combat League.
@@ -771,26 +771,32 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             # Create an embed message indicating the start of the new season.
             embed = discord.Embed(
                 title="New Season!",
-                description=f"Season {season} of Thandar Combat League has started with {len(season_tournaments)} division(s)! Let the combat begin!",
+                description=f"Season {season} of Thandar Combat League has started with {len(season_tournaments)} divisions! Let the combat begin!",
                 colour=discord.Colour.dark_blue(),
             )
+
+            # Mention the "Thandar Combat League" role
+            role = discord.utils.get(context.guild.roles, name="Thandar Combat League")
+            if role:
+                embed.description += f"\n\nAttention {role.mention}: Season {season} of Thandar Combat League has started with {len(season_tournaments)} divisions!"
+
             embed.set_footer(
                 text=f"There are now {len(waitlist)} participants in season {season} of Thandar Combat League!"
             )
 
-            # Get the specific channel to send the message to.
-            channel = self.bot.get_channel(1088139363294130200)
-
-            # Send the embed message indicating successful season start to the specific channel.
-            await channel.send(embed=embed)
-        except Exception as e:
-            # If there was an error starting the season, send a message indicating the error.
-            embed = discord.Embed(
-                title="Error!",
-                description=f"An error occurred while trying to start season {season}: {str(e)}",
-                colour=discord.Colour.dark_red(),
-            )
-            await context.send(embed=embed)
+            # # Season announcement WIP!!!
+            # additional_text = "Thank you all so much for your participation!\n\n" \
+            #                   "I have done a major overhaul on the backend/organizational side of things in order to use the Hero-Helper Bot to track and record everything.  The match reporting/tracking process will now happen in discord using bot commands. These commands will only work in your specific division channels!\n\n"\
+            #                   "`/tcl report` -This command will report an open match result. You will need to enter the round number, winner's name, and the number of games that were won by the winner of the match. Either player can report results and once reported duplicate reports will not mess things up.\n"\
+            #                   "`/tcl standings` - This command will post the current division standings, listing players from first to last using win percentage as the primary metric. Match wins are the first tiebreaker.  I have not coded in the final head-to-head tie-breaker yet so the command will not take that into account and will randomly list players who are tied.\n\n"\
+            #                   "If you are not familiar with discord bot commands, I made some tutorial videos for the Hero-Helper Bot that you can check out:\n"\
+            #                   "Introduction to Hero-Helper Bot: [link here]\n"\
+            #                   "Thandar Combat League with Hero-Helper Bot: [link here]\n\n"\
+            #                   "Be sure to keep an eye on this channel for league-wide announcements, and your division channel for the division specific stuff. Feel free to let me know if there are any questions.\n\n"\
+            #                   "Good luck and let the battles begin!"
+            #
+            # # Add the additional text to the embed
+            # embed.add_field(name="Thandar Combat League Information", value=additional_text, inline=False)
 
 
 async def setup(bot):
