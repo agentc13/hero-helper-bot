@@ -781,53 +781,91 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         # Clear the waitlist for the next season.
         await db_manager.clear_waitlist()
 
-        try:
-            # Challonge community (subdomain) hosting the tournament
-            community_name = "b5d0ca83e61253ea7f84a60c"
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "b5d0ca83e61253ea7f84a60c"
 
-            # Get the list of all tournaments
-            tournaments = challonge.tournaments.index(state='all', subdomain=community_name)
+        # Get the list of all tournaments
+        tournaments = challonge.tournaments.index(state='all', subdomain=community_name)
 
-            # Find all tournaments that start with 'S{season}'
-            season_tournaments = [t for t in tournaments if t['name'].lower().startswith(f's{season}')]
+        # Find all tournaments that start with 'S{season}'
+        season_tournaments = [t for t in tournaments if t['name'].lower().startswith(f's{season}')]
 
-            # Start each season tournament
-            for tournament in season_tournaments:
-                # Randomize seeds before starting the tournament
-                challonge.participants.randomize(tournament['id'])
+        # Start each season tournament
+        for tournament in season_tournaments:
+            # Randomize seeds before starting the tournament
+            challonge.participants.randomize(tournament['id'])
 
-                challonge.tournaments.start(tournament['id'], subdomain=community_name)
+            challonge.tournaments.start(tournament['id'], subdomain=community_name)
 
-            # Mention the "Thandar Combat League" role
-            role = discord.utils.get(context.guild.roles, id=1088139361217945688)
-            # Get the channel ID of the specific channel you want to send the message to
-            channel_id = 1088139363294130200
+        # Mention the "Thandar Combat League" role
+        role = discord.utils.get(context.guild.roles, id=1088139361217945688)
+        # Get the channel ID of the specific channel you want to send the message to
+        channel_id = 1088139363294130200
 
-            # Obtain the channel object using the channel ID
-            channel = context.guild.get_channel(channel_id)
+        # Obtain the channel object using the channel ID
+        channel = context.guild.get_channel(channel_id)
 
-            if channel:
-                # Send the message to the specific channel
-                await channel.send(
-                    f"{role.mention}\n"
-                    f"**Season {season} of Thandar Combat League has started!**\n\n"
-                    f"Thank you all so much for participating! I have done a major overhaul on the backend/organizational side of things in order to use the Hero-Helper Bot to track and record everything.  The match reporting/tracking process will now happen in discord using bot commands. *These commands will only work in your specific division channels!*\n\n"
-                    f"`/tcl report` -This command will report an open match result. You will need to enter the round number, winner's name, and the number of games that were won by the winner of the match. Either player can report results and once reported duplicate reports will not mess things up.\n\n"
-                    f"`/tcl standings` - This command will post the current division standings, listing players from first to last using win percentage as the primary metric. Match wins are the first tiebreaker.  I have not coded in the final head-to-head tie-breaker yet so the command will not take that into account and will randomly list players who are tied.\n\n"
-                    f"If you are not familiar with discord bot commands, I made some tutorial videos for the Hero-Helper Bot that you can check out:\n"
-                    f"Introduction to Hero-Helper Bot: [link here]\n"
-                    f"Thandar Combat League with Hero-Helper Bot: [link here]\n\n"
-                    f"Be sure to keep an eye on this channel for league-wide announcements, and your division channel for the division specific stuff. Feel free to let me know if there are any questions.\n\n"
-                    f"Good luck and let the battles begin!"
-                )
-                await context.send("Season announcement sent!")
-            else:
-                # Channel not found, send an error message
-                await context.send("The specified channel was not found.")
+        if channel:
+            # Send the message to the specific channel
+            await channel.send(
+                f"{role.mention}\n"
+                f"**Season {season} of Thandar Combat League has started!**\n\n"
+                f"Thank you all so much for participating! I have done a major overhaul on the backend/organizational side of things in order to use the Hero-Helper Bot to track and record everything.  The match reporting/tracking process will now happen in discord using bot commands. *These commands will only work in your specific division channels!*\n\n"
+                f"`/tcl report` -This command will report an open match result. You will need to enter the round number, winner's name, and the number of games that were won by the winner of the match. Either player can report results and once reported duplicate reports will not mess things up.\n\n"
+                f"`/tcl standings` - This command will post the current division standings, listing players from first to last using win percentage as the primary metric. Match wins are the first tiebreaker.  I have not coded in the final head-to-head tie-breaker yet so the command will not take that into account and will randomly list players who are tied.\n\n"
+                f"If you are not familiar with discord bot commands, I made some tutorial videos for the Hero-Helper Bot that you can check out:\n"
+                f"Introduction to Hero-Helper Bot: [link here]\n"
+                f"Thandar Combat League with Hero-Helper Bot: [link here]\n\n"
+                f"Be sure to keep an eye on this channel for league-wide announcements, and your division channel for the division specific stuff. Feel free to let me know if there are any questions.\n\n"
+                f"Good luck and let the battles begin!"
+            )
+            await context.send("Season announcement sent!")
+        else:
+            # Channel not found, send an error message
+            await context.send("The specified channel was not found.")
 
-        except Exception as e:
-            # Send an error message to the command user.
-            await context.send("Something went wrong while trying to start the new season.")
+    @tcl.command(
+        base="tcl",
+        name="end_season",
+        description="Finalizes all divisions for a Thandar Combat League season.",
+        hidden=True,
+    )
+    @commands.has_role("TCL Organizer")
+    async def end_season(self, context: Context, season: int):
+        """
+        Finalizes all divisions for a Thandar Combat League season.
+
+        :param context: The hybrid command context.
+        :param season: The season number.
+        """
+        # Challonge community (subdomain) hosting the tournament
+        community_name = "b5d0ca83e61253ea7f84a60c"
+
+        # Get the list of all tournaments
+        tournaments = challonge.tournaments.index(state='all', subdomain=community_name)
+
+        # Find all tournaments that belong to the specified season
+        season_tournaments = [t for t in tournaments if t['name'].lower().startswith(f's{season}')]
+
+        if not season_tournaments:
+            embed = discord.Embed(
+                title='Error!',
+                description=f'No divisions found for season {season}.',
+                colour=discord.Colour.dark_red(),
+            )
+            await context.send(embed=embed)
+            return
+
+        for tournament in season_tournaments:
+            # Finalize each tournament
+            challonge.tournaments.finalize(tournament['id'], subdomain=community_name)
+
+        embed = discord.Embed(
+            title='Success!',
+            description=f'All divisions for season {season} have been finalized.',
+            colour=discord.Colour.green(),
+        )
+        await context.send(embed=embed)
 
 
 async def setup(bot):

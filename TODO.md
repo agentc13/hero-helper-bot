@@ -2,7 +2,6 @@
 Use players challonge account for specific events instead of creating a nickname in Challonge.
 
 **Thandar Combat League:**
-Automate Division Roles when adding players to a division - AC13
 Finalize season command (combines finalize division for all divisions) - TO
 Automate weekly announcements - AC13
 Promote/demote automation - AC13
