@@ -282,7 +282,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
 
         # Create the embed to be sent
         embed = discord.Embed(
-            title=f"Division: {tournament['name'].title()}",
+            title=f"{tournament['name'].title()}",
             description="Player Statistics",
             colour=discord.Colour.dark_green(),
         )
