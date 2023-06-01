@@ -861,12 +861,28 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             # Finalize each tournament
             challonge.tournaments.finalize(tournament['id'], subdomain=community_name)
 
-        embed = discord.Embed(
-            title='Success!',
-            description=f'All divisions for season {season} have been finalized.',
-            colour=discord.Colour.green(),
-        )
-        await context.send(embed=embed)
+            # Mention the "Thandar Combat League" role
+            role = discord.utils.get(context.guild.roles, id=1088139361217945688)
+            # Get the channel ID of the specific channel you want to send the message to
+            channel_id = 1088139363294130200
+
+            # Obtain the channel object using the channel ID
+            channel = context.guild.get_channel(channel_id)
+
+            if channel:
+                # Send the message to the specific channel
+                await channel.send(
+                    f"{role.mention}\n"
+                    f"**Season {season} of Thandar Combat League has ended!**\n\n"
+                    f"Thank you all so much for participating!\n\n"
+                    f"You can use the `/tcl standings` command in your division channel to see how everyone ranked.\n"
+                    f"This command will post the current division standings, listing players from first to last using win percentage as the primary metric. Match wins are the first tiebreaker.  *I have not coded in the final head-to-head tie-breaker yet so the command will not take that into account and will randomly list players who are tied.*\n\n"
+                    f"Promotions/Demotions will be posted soon."
+                )
+                await context.send("Season announcement sent!")
+            else:
+                # Channel not found, send an error message
+                await context.send("The specified channel was not found.")
 
 
 async def setup(bot):
