@@ -203,7 +203,8 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
 
         :param context: The hybrid command context.
         """
-        division_name = context.channel.name  # Get division_name from channel name
+        division_name = context.channel.name.replace("-",
+                                                     " ")  # Get division_name from channel name and replace "-" with " "
 
         # Challonge community (subdomain) hosting the tournament
         community_name = "b5d0ca83e61253ea7f84a60c"
