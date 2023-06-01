@@ -768,7 +768,6 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
 
                 challonge.tournaments.start(tournament['id'], subdomain=community_name)
 
-
             # Mention the "Thandar Combat League" role
             role = discord.utils.get(context.guild.roles, id=1088139361217945688)
 

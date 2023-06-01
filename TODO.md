@@ -3,8 +3,8 @@ Use players challonge account for specific events instead of creating a nickname
 
 **Thandar Combat League:**
 Automate Division Roles when adding players to a division - AC13
-Set division name in commands depending on the channel command is issued in - AC13
 Create start command for league season (combines start division for all divisions) - TO
+    I need to create the channels for each division and clean up the code.
 Finalize season command (combines finalize division for all divisions) - TO
 Automate weekly announcements - AC13
 Promote/demote automation - AC13
