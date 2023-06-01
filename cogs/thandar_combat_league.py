@@ -4,7 +4,7 @@ import time
 import operator
 from discord.ext import commands
 from discord.ext.commands import Context
-
+from discord.utils import get
 from helpers import db_manager
 
 
@@ -440,6 +440,19 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
 
             for hr_ign in hr_igns_list:
                 participant = challonge.participants.create(tournament['id'], hr_ign, subdomain=community_name)
+
+                # Get the Discord user ID from the database based on HR IGN
+                user_id = await db_manager.get_user_id_from_db(hr_ign)
+
+                if user_id:
+                    # Assign the role with the same name as the division to the player
+                    guild = context.guild
+                    role_name = division_name.lower().replace(" ",
+                                                              "_")  # Assuming role names are lowercase and space replaced with underscores
+                    role = get(guild.roles, name=role_name)
+                    if role:
+                        member = guild.get_member(user_id)
+                        await member.add_roles(role)
 
                 embed = discord.Embed(
                     title="Participant Added",
