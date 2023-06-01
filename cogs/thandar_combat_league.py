@@ -820,6 +820,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
                     f"Be sure to keep an eye on this channel for league-wide announcements, and your division channel for the division specific stuff. Feel free to let me know if there are any questions.\n\n"
                     f"Good luck and let the battles begin!"
                 )
+                await context.send("Season announcement sent!")
             else:
                 # Channel not found, send an error message
                 await context.send("The specified channel was not found.")
