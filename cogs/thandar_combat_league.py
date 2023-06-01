@@ -2,7 +2,6 @@ import discord
 import challonge
 import time
 import operator
-from tabulate import tabulate
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -782,16 +781,10 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             # Mention the "Thandar Combat League" role
             role = discord.utils.get(context.guild.roles, id=1088139361217945688)
 
-            # Create an embed message indicating the start of the new season.
-            # embed = discord.Embed(
-            #     title=f"Season {season} of Thandar Combat League has started with {len(season_tournaments)} divisions!",
-            #     description=f"{role.mention}\n\nThank you all so much for your participation!\n\nI have done a major overhaul on the backend/organizational side of things in order to use the Hero-Helper Bot to track and record everything.  The match reporting/tracking process will now happen in discord using bot commands. These commands will only work in your specific division channels!\n\n`/tcl report` -This command will report an open match result. You will need to enter the round number, winner's name, and the number of games that were won by the winner of the match. Either player can report results and once reported duplicate reports will not mess things up.\n\n`/tcl standings` - This command will post the current division standings, listing players from first to last using win percentage as the primary metric. Match wins are the first tiebreaker.  I have not coded in the final head-to-head tie-breaker yet so the command will not take that into account and will randomly list players who are tied.\n\nIf you are not familiar with discord bot commands, I made some tutorial videos for the Hero-Helper Bot that you can check out:\nIntroduction to Hero-Helper Bot: [link here]\nThandar Combat League with Hero-Helper Bot: [link here]\n\nBe sure to keep an eye on this channel for league-wide announcements, and your division channel for the division specific stuff. Feel free to let me know if there are any questions.\n\nGood luck and let the battles begin!",
-            #     colour=discord.Colour.dark_blue()
-            # )
-
             await context.send(
-                f"**Season {season} of Thandar Combat League has started with {len(season_tournaments)} divisions!**\n\n"
-                f"{role.mention}\n\nThank you all so much for your participation!\n\nI have done a major overhaul on the backend/organizational side of things in order to use the Hero-Helper Bot to track and record everything.  The match reporting/tracking process will now happen in discord using bot commands. These commands will only work in your specific division channels!\n\n"
+                f"{role.mention}\n"
+                f"**Season {season} of Thandar Combat League has started!**\n\n"
+                f"Thank you all so much for participating! I have done a major overhaul on the backend/organizational side of things in order to use the Hero-Helper Bot to track and record everything.  The match reporting/tracking process will now happen in discord using bot commands. *These commands will only work in your specific division channels!*\n\n"
                 f"`/tcl report` -This command will report an open match result. You will need to enter the round number, winner's name, and the number of games that were won by the winner of the match. Either player can report results and once reported duplicate reports will not mess things up.\n\n"
                 f"`/tcl standings` - This command will post the current division standings, listing players from first to last using win percentage as the primary metric. Match wins are the first tiebreaker.  I have not coded in the final head-to-head tie-breaker yet so the command will not take that into account and will randomly list players who are tied.\n\n"
                 f"If you are not familiar with discord bot commands, I made some tutorial videos for the Hero-Helper Bot that you can check out:\n"
