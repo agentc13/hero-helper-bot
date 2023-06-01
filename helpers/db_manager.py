@@ -86,3 +86,16 @@ async def clear_waitlist():
     async with aiosqlite.connect(DATABASE_PATH) as db:
         await db.execute("DELETE FROM waitlist")
         await db.commit()
+
+
+async def get_user_id_from_db(hr_ign):
+    """
+    Retrieve the user ID from the SQLite database based on the HR IGN.
+
+    :param hr_ign: The HR IGN for which to retrieve the user ID.
+    :return: The user ID if found, None otherwise.
+    """
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        async with db.execute("SELECT user_id FROM tcl_participants WHERE hr_ign=?", (hr_ign,)) as cursor:
+            result = await cursor.fetchone()
+            return result[0] if result is not None else None
