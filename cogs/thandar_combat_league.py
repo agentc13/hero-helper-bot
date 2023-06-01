@@ -445,14 +445,22 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
                 user_id = await db_manager.get_user_id_from_db(hr_ign)
 
                 if user_id:
-                    # Assign the role with the same name as the division to the player
                     guild = context.guild
-                    role_name = division_name.lower().replace(" ",
-                                                              "_")  # Assuming role names are lowercase and space replaced with underscores
-                    role = get(guild.roles, name=role_name)
-                    if role:
-                        member = guild.get_member(user_id)
-                        await member.add_roles(role)
+                    member = guild.get_member(user_id)  # Try fetching the member
+
+                    if member is None:
+                        # Member not found, fetch the member using Discord's API
+                        try:
+                            member = await guild.fetch_member(user_id)
+                        except discord.NotFound:
+                            member = None
+
+                    if member:
+                        # Assign the role with the same name as the division to the player
+                        role_name = division_name.title()
+                        role = discord.utils.get(guild.roles, name=role_name)
+                        if role:
+                            await member.add_roles(role)
 
                 embed = discord.Embed(
                     title="Participant Added",
