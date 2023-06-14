@@ -703,6 +703,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
     @tcl.command(
         name="create_season",
         description="Creates a new season of Thandar Combat League.",
+        hidden=True,
     )
     @commands.has_role("TCL Organizer")
     async def create_season(self, context: Context, season_number: int):
@@ -764,6 +765,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
     @tcl.command(
         name="start_season",
         description="Starts a new season of Thandar Combat League.",
+        hidden=True,
     )
     @commands.has_role("TCL Organizer")
     async def start_season(self, context: Context, season: int):
@@ -801,7 +803,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
         # Mention the "Thandar Combat League" role
         role = discord.utils.get(context.guild.roles, id=1088139361217945688)
         # Get the channel ID of the specific channel you want to send the message to
-        channel_id = 1088139363294130200
+        channel_id = 994709202914267297
 
         # Obtain the channel object using the channel ID
         channel = context.guild.get_channel(channel_id)
@@ -864,7 +866,7 @@ class Tcl(commands.Cog, name="Thandar Combat League"):
             # Mention the "Thandar Combat League" role
             role = discord.utils.get(context.guild.roles, id=1088139361217945688)
             # Get the channel ID of the specific channel you want to send the message to
-            channel_id = 1088139363294130200
+            channel_id = 994709202914267297
 
             # Obtain the channel object using the channel ID
             channel = context.guild.get_channel(channel_id)

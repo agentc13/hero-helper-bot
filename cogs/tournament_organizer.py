@@ -42,6 +42,7 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
     @to.command(
         name="create_tournament",
         description="Create a new tournament in Challonge.",
+        hidden=True,
     )
     @commands.has_role("Tournament Organizer")
     async def create_tournament(self, context: Context, tournament_name: str, group: str, tournament_type: str):
@@ -93,6 +94,7 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
     @to.command(
         name="remove_tournament",
         description="Remove a tournament from Challonge.",
+        hidden=True,
     )
     @commands.has_role("Tournament Organizer")
     async def remove_tournament(self, context: Context, tournament_name: str):
@@ -124,6 +126,7 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
     @to.command(
         name="start_tournament",
         description="Start a tournament in Challonge.",
+        hidden=True,
     )
     @commands.has_role("Tournament Organizer")
     async def start_tournament(self, context: Context, tournament_name: str, group: str):
@@ -180,6 +183,7 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
     @to.command(
         name="reset_tournament",
         description="Reset a Challonge tournament by its name.",
+        hidden=True,
     )
     @commands.has_role("Tournament Organizer")
     async def reset_tournament(self, context: Context, tournament_name: str):
@@ -212,6 +216,7 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
     @to.command(
         name="add_player",
         description="Manually add a player to a tournament.",
+        hidden=True,
     )
     @commands.has_role("Tournament Organizer")
     async def add_player(self, context: Context, tournament_name: str, player_name: str):
@@ -248,6 +253,7 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
     @to.command(
         name="remove_player",
         description="Manually remove a player from a tournament.",
+        hidden=True,
     )
     @commands.has_role("Tournament Organizer")
     async def remove_player(self, context: Context, tournament_name: str, name: str):
@@ -296,6 +302,7 @@ class TournamentOrganizer(commands.Cog, name="Tournament Organizer"):
     @to.command(
         name="finalize",
         description="Finalize a Challonge tournament.",
+        hidden=True,
     )
     @commands.has_role("Tournament Organizer")
     async def finalize(self, context: Context, tournament_name: str, group: str):

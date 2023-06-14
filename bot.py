@@ -139,7 +139,7 @@ async def status_task():
     Set up the discord status task of the bot.
     """
     await bot.change_presence(
-        activity=discord.Activity(type=discord.ActivityType.listening, name="Sparks & Recreation Podcast"))
+        activity=discord.Activity(type=discord.ActivityType.listening, name="Sparks & Rec Podcast"))
 
 
 @bot.event
