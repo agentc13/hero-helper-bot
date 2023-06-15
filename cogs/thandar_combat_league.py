@@ -4,7 +4,7 @@ import time
 import operator
 from discord.ext import commands
 from discord.ext.commands import Context
-from helpers import db_manager
+from helpers import db_manager, automation
 
 
 class Tcl(commands.Cog, name="Thandar Combat League"):

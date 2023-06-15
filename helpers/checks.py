@@ -1,9 +1,7 @@
 import json
 import os
-import discord
 
 from exceptions import *
-from functools import wraps
 
 
 def is_owner():
