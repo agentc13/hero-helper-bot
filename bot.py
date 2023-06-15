@@ -133,6 +133,7 @@ async def on_ready():
         await bot.tree.sync()
 
 
+
 @tasks.loop(minutes=1.0)
 async def status_task():
     """
